@@ -28,6 +28,20 @@ class HapticsService {
     } catch (_) {}
   }
 
+  static Future<void> mediumImpact() async {
+    if (!enabled) return;
+    try {
+      await HapticFeedback.mediumImpact();
+    } catch (_) {}
+  }
+
+  static Future<void> heavyImpact() async {
+    if (!enabled) return;
+    try {
+      await HapticFeedback.heavyImpact();
+    } catch (_) {}
+  }
+
   static Future<void> warning() async {
     if (!enabled) return;
     try {

@@ -44,6 +44,28 @@ class ActivityLauncherSheet extends StatelessWidget {
       tag: 'POPULAR',
     ),
     ActivityItem(
+      id: 'teen_patti',
+      title: 'Teen Patti Royale',
+      description:
+          'Traditional Indian 3-card poker. Chaal, Blind bets, and high stakes psychological showdowns.',
+      playerRange: '2-6 Players',
+      duration: '10 min',
+      icon: Icons.diamond_rounded,
+      accentColor: AddaColors.amber,
+      tag: 'CARDS',
+    ),
+    ActivityItem(
+      id: 'rummy',
+      title: 'Indian Rummy (13 Cards)',
+      description:
+          'Classic 13-card rummy. Pure sequences, sets, wild jokers, and smart declarations.',
+      playerRange: '2-6 Players',
+      duration: '12 min',
+      icon: Icons.view_carousel_rounded,
+      accentColor: AddaColors.cyan,
+      tag: 'CARDS',
+    ),
+    ActivityItem(
       id: 'uno',
       title: 'UNO Clash',
       description:
@@ -64,6 +86,61 @@ class ActivityLauncherSheet extends StatelessWidget {
       icon: Icons.psychology_alt_rounded,
       accentColor: AddaColors.rose,
       tag: 'BLUFF',
+    ),
+    ActivityItem(
+      id: 'mafia',
+      title: 'Mafia / Werewolf',
+      description:
+          'Social deduction thriller. Night killings, doctor heals, detective clues, and heated town hall trials.',
+      playerRange: '4-12 Players',
+      duration: '15 min',
+      icon: Icons.masks_rounded,
+      accentColor: AddaColors.rose,
+      tag: 'DEDUCTION',
+    ),
+    ActivityItem(
+      id: 'draw_guess',
+      title: 'Draw & Guess',
+      description:
+          'Real-time collaborative whiteboard. One sketches secret prompts, others race to guess.',
+      playerRange: '2-8 Players',
+      duration: '8 min',
+      icon: Icons.palette_rounded,
+      accentColor: AddaColors.emerald,
+      tag: 'CREATIVE',
+    ),
+    ActivityItem(
+      id: 'quiz_clash',
+      title: 'Quiz Clash',
+      description:
+          'Trivia showdown covering Cinema, Cricket, and Culture with rapid speed bonuses.',
+      playerRange: '1-8 Players',
+      duration: '6 min',
+      icon: Icons.quiz_rounded,
+      accentColor: AddaColors.violet,
+      tag: 'TRIVIA',
+    ),
+    ActivityItem(
+      id: 'couple_mode',
+      title: 'Couple Sanctuary',
+      description:
+          'Intimate questions, memory sync, and compatibility meter designed for two.',
+      playerRange: '2 Players',
+      duration: '10 min',
+      icon: Icons.favorite_rounded,
+      accentColor: AddaColors.rose,
+      tag: 'COUPLE',
+    ),
+    ActivityItem(
+      id: 'watch_together',
+      title: 'Watch & Listen Together',
+      description:
+          'Sub-second synchronized music and video jukebox. Party playlists and shared vibes.',
+      playerRange: '1-16 Players',
+      duration: 'Ongoing',
+      icon: Icons.headset_rounded,
+      accentColor: AddaColors.cyan,
+      tag: 'MEDIA',
     ),
     ActivityItem(
       id: 'brain_arena',

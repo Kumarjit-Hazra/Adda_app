@@ -197,16 +197,20 @@ class _AppButtonState extends State<AppButton>
             widget.icon!,
             const SizedBox(width: AddaSpacing.sm),
           ],
-          Text(
-            widget.text,
-            style: TextStyle(
-              color: isEnabled
-                  ? textColor
-                  : (isDark
-                        ? AddaColors.textMutedDark
-                        : AddaColors.textMutedLight),
-              fontWeight: FontWeight.w600,
-              fontSize: 15,
+          Flexible(
+            child: Text(
+              widget.text,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: TextStyle(
+                color: isEnabled
+                    ? textColor
+                    : (isDark
+                          ? AddaColors.textMutedDark
+                          : AddaColors.textMutedLight),
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
             ),
           ),
         ],

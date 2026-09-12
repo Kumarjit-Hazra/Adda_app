@@ -18,8 +18,15 @@ import '../widgets/reaction_picker.dart';
 import '../widgets/room_chat_drawer.dart';
 import '../widgets/room_controls_bar.dart';
 import '../../../games/twenty_nine/twenty_nine_view.dart';
+import '../../../games/teen_patti/teen_patti_view.dart';
+import '../../../games/rummy/rummy_view.dart';
 import '../../../games/uno/uno_view.dart';
 import '../../../games/bluff/bluff_view.dart';
+import '../../../games/mafia/mafia_view.dart';
+import '../../../games/draw_guess/draw_guess_view.dart';
+import '../../../games/quiz/quiz_view.dart';
+import '../../../games/couple_mode/couple_mode_view.dart';
+import '../../../games/watch_together/watch_together_view.dart';
 import '../../../games/brain_arena/brain_arena_view.dart';
 import '../../../games/coop_puzzle/coop_puzzle_view.dart';
 
@@ -414,8 +421,15 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
         Positioned.fill(
           child: switch (activityId) {
             'twenty_nine' => const TwentyNineView(),
+            'teen_patti' => const TeenPattiView(),
+            'rummy' => const RummyView(),
             'uno' => const UnoView(),
             'bluff' => const BluffView(),
+            'mafia' => const MafiaView(),
+            'draw_guess' => const DrawGuessView(),
+            'quiz_clash' => const QuizView(),
+            'couple_mode' => const CoupleModeView(),
+            'watch_together' => const WatchTogetherView(),
             'brain_arena' => const BrainArenaView(),
             'coop_puzzle' => const CoopPuzzleView(),
             _ => Center(child: Text('Unknown Activity: $activityId')),
