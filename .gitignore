@@ -1,0 +1,79 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# Documentation (excluded per user request)
+/docs/
+*.md.bak
+
+# IDE & Editor files
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+*.code-workspace
+
+# Flutter / Dart / Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Android build and configuration
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+/android/.gradle/
+/android/local.properties
+/android/captures/
+/android/.cxx/
+key.properties
+**/*.keystore
+**/*.jks
+
+# iOS build and configuration
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/ephemeral/
+ios/Flutter/app.flx
+ios/Flutter/app.zip
+ios/Flutter/flutter_assets/
+ios/Pods/
+ios/.symlinks/
+ios/**/DerivedData/
+ios/**/xcuserdata/
+ios/**/profile
+ios/**/.generated/
+
+# macOS / Linux / Windows ephemeral files
+macos/Flutter/ephemeral/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Symbolication and obfuscation
+app.*.symbols
+app.*.map.json
