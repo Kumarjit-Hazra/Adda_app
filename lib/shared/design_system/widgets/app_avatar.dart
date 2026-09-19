@@ -8,6 +8,7 @@ class AppAvatar extends StatelessWidget {
   final double size;
   final bool isSpeaking;
   final bool isOnline;
+  final bool isBot;
   final VoidCallback? onTap;
 
   const AppAvatar({
@@ -17,6 +18,7 @@ class AppAvatar extends StatelessWidget {
     this.size = 44,
     this.isSpeaking = false,
     this.isOnline = true,
+    this.isBot = false,
     this.onTap,
   });
 
@@ -83,7 +85,29 @@ class AppAvatar extends StatelessWidget {
       ),
     );
 
-    if (isOnline) {
+    final showBot = isBot || name.contains('Bot') || name.contains('🤖');
+
+    if (showBot) {
+      avatar = Stack(
+        clipBehavior: Clip.none,
+        children: [
+          avatar,
+          Positioned(
+            right: -2,
+            bottom: -2,
+            child: Container(
+              padding: const EdgeInsets.all(1.5),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1B4B),
+                shape: BoxShape.circle,
+                border: Border.all(color: AddaColors.violet, width: 1.2),
+              ),
+              child: const Text('🤖', style: TextStyle(fontSize: 10)),
+            ),
+          ),
+        ],
+      );
+    } else if (isOnline) {
       avatar = Stack(
         clipBehavior: Clip.none,
         children: [

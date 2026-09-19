@@ -36,13 +36,17 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
   Future<void> joinRoom({
     required String spaceId,
     required String spaceName,
+    bool isSoloMode = false,
+    bool autoJoinVoice = false,
   }) async {
     final user = _ref.read(authProvider).valueOrNull;
     if (user == null) return;
 
-    final roomId = 'room_$spaceId';
+    final roomId = isSoloMode
+        ? 'solo_${spaceId}_${const Uuid().v4().substring(0, 6)}'
+        : 'room_$spaceId';
 
-    // Seed room with local user + room companions
+    // Seed room with local user + room companions (or bots in solo mode)
     final localParticipant = Participant(
       id: user.id,
       name: user.name,
@@ -53,33 +57,57 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
       isHost: true,
     );
 
-    // Initial companion peers for vibrant hangout vibe
-    final companionPeers = [
-      const Participant(
-        id: 'usr_sim_1',
-        name: 'Aarav Sharma',
-        isSpeaking: false,
-        isMuted: false,
-        isVideoEnabled: false,
-        pingMs: 24,
-      ),
-      const Participant(
-        id: 'usr_sim_2',
-        name: 'Diya Sen',
-        isSpeaking: false,
-        isMuted: false,
-        isVideoEnabled: false,
-        pingMs: 32,
-      ),
-      const Participant(
-        id: 'usr_sim_3',
-        name: 'Kabir Roy',
-        isSpeaking: false,
-        isMuted: true,
-        isVideoEnabled: false,
-        pingMs: 19,
-      ),
-    ];
+    final companionPeers = isSoloMode
+        ? [
+            const Participant(
+              id: 'bot_1',
+              name: 'Kabir Bot 🤖',
+              isSpeaking: false,
+              isMuted: true,
+              isVideoEnabled: false,
+              pingMs: 5,
+            ),
+            const Participant(
+              id: 'bot_2',
+              name: 'Diya Bot 🤖',
+              isSpeaking: false,
+              isMuted: true,
+              isVideoEnabled: false,
+              pingMs: 5,
+            ),
+          ]
+        : [
+            const Participant(
+              id: 'usr_sim_1',
+              name: 'Aarav Sharma',
+              isSpeaking: false,
+              isMuted: false,
+              isVideoEnabled: false,
+              pingMs: 24,
+            ),
+            const Participant(
+              id: 'usr_sim_2',
+              name: 'Diya Sen',
+              isSpeaking: false,
+              isMuted: false,
+              isVideoEnabled: false,
+              pingMs: 32,
+            ),
+            const Participant(
+              id: 'usr_sim_3',
+              name: 'Kabir Roy',
+              isSpeaking: false,
+              isMuted: true,
+              isVideoEnabled: false,
+              pingMs: 19,
+            ),
+          ];
+
+    final welcomeContent = isSoloMode
+        ? 'Solo practice with smart bots. No voice chat or waiting required!'
+        : (autoJoinVoice
+              ? 'Welcome to $spaceName! Voice is live.'
+              : 'Welcome to $spaceName! Voice is off. Tap [Join Voice] anytime to talk.');
 
     state = RoomSession(
       roomId: roomId,
@@ -92,29 +120,66 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
           id: const Uuid().v4(),
           senderId: 'system',
           senderName: 'ADDA System',
-          content:
-              'Welcome to $spaceName! Voice is live. Tap Play to start an activity.',
+          content: welcomeContent,
           timestamp: DateTime.now(),
           isSystem: true,
         ),
       ],
       isConnected: true,
+      isVoiceJoined: autoJoinVoice,
+      isSoloMode: isSoloMode,
     );
 
-    await _signaling.connect(roomId, user.id);
-    await _webrtc.initializeMedia();
+    if (!isSoloMode) {
+      await _signaling.connect(roomId, user.id);
+      _signalingSub?.cancel();
+      _signalingSub = _signaling.eventStream.listen(_handleSignalingEvent);
+    }
 
-    // Listen to realtime signaling events
-    _signalingSub?.cancel();
-    _signalingSub = _signaling.eventStream.listen(_handleSignalingEvent);
+    if (autoJoinVoice) {
+      await joinVoiceChat();
+    }
+  }
 
-    // Monitor local audio level for speaking indicator
+  void _setupAudioLevelListener() {
+    final user = _ref.read(authProvider).valueOrNull;
+    if (user == null) return;
     _audioLevelSub?.cancel();
     _audioLevelSub = _webrtc.localAudioLevelStream.listen((level) {
-      if (state == null) return;
+      if (state == null || !state!.isVoiceJoined) return;
       final isSpeaking = level > 0.45 && !_webrtc.isMicMuted;
       _updateParticipantSpeaking(user.id, isSpeaking);
     });
+  }
+
+  Future<void> joinVoiceChat() async {
+    if (state == null || state!.isVoiceJoined) return;
+    try {
+      await _webrtc.initializeMedia();
+      _setupAudioLevelListener();
+      state = state!.copyWith(isVoiceJoined: true);
+      HapticsService.success();
+    } catch (_) {}
+  }
+
+  Future<void> leaveVoiceChat() async {
+    if (state == null || !state!.isVoiceJoined) return;
+    _audioLevelSub?.cancel();
+    await _webrtc.stopMedia();
+    final user = _ref.read(authProvider).valueOrNull;
+    if (user != null) {
+      _updateParticipantSpeaking(user.id, false);
+    }
+    state = state!.copyWith(isVoiceJoined: false);
+    HapticsService.lightTap();
+  }
+
+  Future<void> toggleVoiceChat() async {
+    if (state?.isVoiceJoined == true) {
+      await leaveVoiceChat();
+    } else {
+      await joinVoiceChat();
+    }
   }
 
   void _handleSignalingEvent(RealtimeEvent event) {
@@ -233,7 +298,11 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
 
   void setActiveActivity(String? activityId) {
     if (state == null) return;
-    state = state!.copyWith(activeActivityId: activityId);
+    if (activityId == null) {
+      state = state!.copyWith(clearActiveActivity: true);
+    } else {
+      state = state!.copyWith(activeActivityId: activityId);
+    }
     HapticsService.success();
   }
 

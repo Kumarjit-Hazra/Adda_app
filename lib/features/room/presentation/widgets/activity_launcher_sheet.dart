@@ -3,6 +3,19 @@ import '../../../../shared/design_system/tokens/colors.dart';
 import '../../../../shared/design_system/tokens/radius.dart';
 import '../../../../shared/design_system/tokens/spacing.dart';
 import '../../../../shared/design_system/widgets/surface_card.dart';
+import 'game_mode_sheet.dart';
+
+class ActivityLaunchChoice {
+  final String activityId;
+  final GamePlayMode mode;
+  final bool autoJoinVoice;
+
+  const ActivityLaunchChoice({
+    required this.activityId,
+    required this.mode,
+    required this.autoJoinVoice,
+  });
+}
 
 class ActivityItem {
   final String id;
@@ -27,7 +40,7 @@ class ActivityItem {
 }
 
 class ActivityLauncherSheet extends StatelessWidget {
-  final ValueChanged<String> onSelectActivity;
+  final ValueChanged<ActivityLaunchChoice> onSelectActivity;
 
   const ActivityLauncherSheet({super.key, required this.onSelectActivity});
 
@@ -166,13 +179,13 @@ class ActivityLauncherSheet extends StatelessWidget {
     ),
   ];
 
-  static Future<String?> show(BuildContext context) {
-    return showModalBottomSheet<String>(
+  static Future<ActivityLaunchChoice?> show(BuildContext context) {
+    return showModalBottomSheet<ActivityLaunchChoice>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => ActivityLauncherSheet(
-        onSelectActivity: (id) => Navigator.of(ctx).pop(id),
+        onSelectActivity: (choice) => Navigator.of(ctx).pop(choice),
       ),
     );
   }
@@ -238,7 +251,18 @@ class ActivityLauncherSheet extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = activities[index];
                 return SurfaceCard(
-                  onTap: () => onSelectActivity(item.id),
+                  onTap: () async {
+                    final modeResult = await GameModeSheet.show(context, item);
+                    if (modeResult != null) {
+                      onSelectActivity(
+                        ActivityLaunchChoice(
+                          activityId: item.id,
+                          mode: modeResult.mode,
+                          autoJoinVoice: modeResult.autoJoinVoice,
+                        ),
+                      );
+                    }
+                  },
                   margin: const EdgeInsets.only(bottom: AddaSpacing.md),
                   padding: const EdgeInsets.all(AddaSpacing.md),
                   borderColor: item.accentColor.withAlpha(50),

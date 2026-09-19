@@ -10,6 +10,8 @@ class RoomSession {
   final List<ChatMessage> chatMessages;
   final String? activeActivityId;
   final bool isConnected;
+  final bool isVoiceJoined;
+  final bool isSoloMode;
 
   const RoomSession({
     required this.roomId,
@@ -20,6 +22,8 @@ class RoomSession {
     required this.chatMessages,
     this.activeActivityId,
     this.isConnected = true,
+    this.isVoiceJoined = false,
+    this.isSoloMode = false,
   });
 
   RoomSession copyWith({
@@ -30,7 +34,10 @@ class RoomSession {
     List<Participant>? participants,
     List<ChatMessage>? chatMessages,
     String? activeActivityId,
+    bool clearActiveActivity = false,
     bool? isConnected,
+    bool? isVoiceJoined,
+    bool? isSoloMode,
   }) {
     return RoomSession(
       roomId: roomId ?? this.roomId,
@@ -39,8 +46,12 @@ class RoomSession {
       hostId: hostId ?? this.hostId,
       participants: participants ?? this.participants,
       chatMessages: chatMessages ?? this.chatMessages,
-      activeActivityId: activeActivityId ?? this.activeActivityId,
+      activeActivityId: clearActiveActivity
+          ? null
+          : (activeActivityId ?? this.activeActivityId),
       isConnected: isConnected ?? this.isConnected,
+      isVoiceJoined: isVoiceJoined ?? this.isVoiceJoined,
+      isSoloMode: isSoloMode ?? this.isSoloMode,
     );
   }
 }

@@ -12,6 +12,7 @@ abstract class WebRtcService {
   Stream<double> get localAudioLevelStream;
 
   Future<void> initializeMedia();
+  Future<void> stopMedia();
   Future<void> toggleMic();
   Future<void> toggleCamera();
   Future<void> toggleDeafen();
@@ -22,8 +23,19 @@ abstract class WebRtcService {
 /// Robust WebRTC abstraction supporting smooth simulated voice & camera feeds across platforms.
 class DefaultWebRtcService implements WebRtcService {
   WebRtcState _state = WebRtcState.idle;
-  final _stateController = StreamController<WebRtcState>.broadcast();
-  final _audioLevelController = StreamController<double>.broadcast();
+  StreamController<WebRtcState> _stateController =
+      StreamController<WebRtcState>.broadcast();
+  StreamController<double> _audioLevelController =
+      StreamController<double>.broadcast();
+
+  void _ensureControllers() {
+    if (_stateController.isClosed) {
+      _stateController = StreamController<WebRtcState>.broadcast();
+    }
+    if (_audioLevelController.isClosed) {
+      _audioLevelController = StreamController<double>.broadcast();
+    }
+  }
 
   bool _isMicMuted = false;
   bool _isCameraEnabled = false;
@@ -53,6 +65,7 @@ class DefaultWebRtcService implements WebRtcService {
 
   @override
   Future<void> initializeMedia() async {
+    _ensureControllers();
     _setState(WebRtcState.connecting);
     LoggerService.i('WebRtc', 'Initializing audio & video media session');
     await Future.delayed(const Duration(milliseconds: 300));
@@ -63,6 +76,7 @@ class DefaultWebRtcService implements WebRtcService {
     _levelSimulator = Timer.periodic(const Duration(milliseconds: 250), (
       timer,
     ) {
+      if (_audioLevelController.isClosed) return;
       if (_state == WebRtcState.connected && !_isMicMuted) {
         // Output audio level 0.0 to 1.0
         final level = (DateTime.now().millisecond % 100) / 100.0;
@@ -75,7 +89,9 @@ class DefaultWebRtcService implements WebRtcService {
 
   void _setState(WebRtcState newState) {
     _state = newState;
-    _stateController.add(_state);
+    if (!_stateController.isClosed) {
+      _stateController.add(_state);
+    }
   }
 
   @override
@@ -110,9 +126,16 @@ class DefaultWebRtcService implements WebRtcService {
   }
 
   @override
-  Future<void> dispose() async {
+  Future<void> stopMedia() async {
     _levelSimulator?.cancel();
     _setState(WebRtcState.idle);
+    _isCameraEnabled = false;
+    LoggerService.i('WebRtc', 'Stopped WebRTC media session');
+  }
+
+  @override
+  Future<void> dispose() async {
+    await stopMedia();
     await _stateController.close();
     await _audioLevelController.close();
     LoggerService.i('WebRtc', 'Disposed WebRTC media resources cleanly');

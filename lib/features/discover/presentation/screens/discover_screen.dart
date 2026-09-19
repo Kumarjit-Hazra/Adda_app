@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import '../../../../shared/design_system/tokens/colors.dart';
 import '../../../../shared/design_system/tokens/radius.dart';
 import '../../../../shared/design_system/tokens/spacing.dart';
-import '../../../../shared/design_system/widgets/app_button.dart';
 import '../../../../shared/design_system/widgets/app_scaffold.dart';
 import '../../../../shared/design_system/widgets/surface_card.dart';
+import '../../../room/presentation/screens/room_screen.dart';
 import '../../../room/presentation/widgets/activity_launcher_sheet.dart';
+import '../../../room/presentation/widgets/game_mode_sheet.dart';
 
 class DiscoverScreen extends StatelessWidget {
   const DiscoverScreen({super.key});
@@ -69,7 +70,38 @@ class DiscoverScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          AppButton(text: 'Got It', onPressed: () => Navigator.of(ctx).pop()),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Close', style: TextStyle(color: Colors.white60)),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              final choice = await GameModeSheet.show(context, item);
+              if (choice != null && context.mounted) {
+                final isSolo = choice.mode == GamePlayMode.soloWithBots;
+                final spaceId =
+                    'spc_${item.id}_${DateTime.now().millisecondsSinceEpoch % 10000}';
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => RoomScreen(
+                      spaceId: spaceId,
+                      spaceName: '${item.title} ${isSolo ? "Solo" : "Adda"}',
+                      isSoloMode: isSolo,
+                      autoJoinVoice: choice.autoJoinVoice,
+                      initialActivityId: item.id,
+                    ),
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.play_arrow_rounded, size: 18),
+            label: const Text('Play Mode ⚡'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: item.accentColor,
+              foregroundColor: Colors.white,
+            ),
+          ),
         ],
       ),
     );

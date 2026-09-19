@@ -17,6 +17,8 @@ import '../widgets/participant_strip.dart';
 import '../widgets/reaction_picker.dart';
 import '../widgets/room_chat_drawer.dart';
 import '../widgets/room_controls_bar.dart';
+import '../widgets/compact_game_hud.dart';
+import '../widgets/floating_reaction_overlay.dart';
 import '../../../games/twenty_nine/twenty_nine_view.dart';
 import '../../../games/teen_patti/teen_patti_view.dart';
 import '../../../games/rummy/rummy_view.dart';
@@ -33,8 +35,18 @@ import '../../../games/coop_puzzle/coop_puzzle_view.dart';
 class RoomScreen extends ConsumerStatefulWidget {
   final String spaceId;
   final String spaceName;
+  final bool isSoloMode;
+  final bool autoJoinVoice;
+  final String? initialActivityId;
 
-  const RoomScreen({super.key, required this.spaceId, required this.spaceName});
+  const RoomScreen({
+    super.key,
+    required this.spaceId,
+    required this.spaceName,
+    this.isSoloMode = false,
+    this.autoJoinVoice = false,
+    this.initialActivityId,
+  });
 
   @override
   ConsumerState<RoomScreen> createState() => _RoomScreenState();
@@ -47,12 +59,22 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final room = ref.read(roomProvider);
       if (room == null || room.spaceId != widget.spaceId) {
+        await ref
+            .read(roomProvider.notifier)
+            .joinRoom(
+              spaceId: widget.spaceId,
+              spaceName: widget.spaceName,
+              isSoloMode: widget.isSoloMode,
+              autoJoinVoice: widget.autoJoinVoice,
+            );
+      }
+      if (widget.initialActivityId != null) {
         ref
             .read(roomProvider.notifier)
-            .joinRoom(spaceId: widget.spaceId, spaceName: widget.spaceName);
+            .setActiveActivity(widget.initialActivityId);
       }
     });
   }
@@ -282,9 +304,14 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
                   );
                 },
                 onOpenActivities: () async {
-                  final chosen = await ActivityLauncherSheet.show(context);
-                  if (chosen != null) {
-                    ref.read(roomProvider.notifier).setActiveActivity(chosen);
+                  final choice = await ActivityLauncherSheet.show(context);
+                  if (choice != null) {
+                    ref
+                        .read(roomProvider.notifier)
+                        .setActiveActivity(choice.activityId);
+                    if (choice.autoJoinVoice) {
+                      await ref.read(roomProvider.notifier).joinVoiceChat();
+                    }
                   }
                 },
                 onOpenReactions: () {
@@ -416,46 +443,52 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
   }
 
   Widget _buildActiveActivityView(String activityId) {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: switch (activityId) {
-            'twenty_nine' => const TwentyNineView(),
-            'teen_patti' => const TeenPattiView(),
-            'rummy' => const RummyView(),
-            'uno' => const UnoView(),
-            'bluff' => const BluffView(),
-            'mafia' => const MafiaView(),
-            'draw_guess' => const DrawGuessView(),
-            'quiz_clash' => const QuizView(),
-            'couple_mode' => const CoupleModeView(),
-            'watch_together' => const WatchTogetherView(),
-            'brain_arena' => const BrainArenaView(),
-            'coop_puzzle' => const CoopPuzzleView(),
-            _ => Center(child: Text('Unknown Activity: $activityId')),
-          },
-        ),
-        Positioned(
-          top: 8,
-          right: 16,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: AddaRadius.radiusFull,
-            ),
-            child: IconButton(
-              icon: const Icon(
-                Icons.close_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-              tooltip: 'Close Activity to Lounge',
-              onPressed: () =>
+    final room = ref.watch(roomProvider);
+    final user = ref.read(authProvider).valueOrNull;
+    final localUserId = user?.id ?? '';
+
+    return FloatingReactionOverlay(
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: switch (activityId) {
+              'twenty_nine' => const TwentyNineView(),
+              'teen_patti' => const TeenPattiView(),
+              'rummy' => const RummyView(),
+              'uno' => const UnoView(),
+              'bluff' => const BluffView(),
+              'mafia' => const MafiaView(),
+              'draw_guess' => const DrawGuessView(),
+              'quiz_clash' => const QuizView(),
+              'couple_mode' => const CoupleModeView(),
+              'watch_together' => const WatchTogetherView(),
+              'brain_arena' => const BrainArenaView(),
+              'coop_puzzle' => const CoopPuzzleView(),
+              _ => Center(child: Text('Unknown Activity: $activityId')),
+            },
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: CompactGameHud(
+              onClose: () =>
                   ref.read(roomProvider.notifier).setActiveActivity(null),
+              onOpenChat: () {
+                if (room != null) {
+                  RoomChatDrawer.show(
+                    context,
+                    messages: room.chatMessages,
+                    localUserId: localUserId,
+                    onSendMessage: (msg) =>
+                        ref.read(roomProvider.notifier).sendChatMessage(msg),
+                  );
+                }
+              },
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
