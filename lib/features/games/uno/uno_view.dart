@@ -49,65 +49,10 @@ class _UnoViewState extends ConsumerState<UnoView> {
       });
       AudioService.playCardPlay();
       HapticsService.cardPlay();
-
-      _triggerBotTurnIfNeeded();
     }
   }
 
-  void _triggerBotTurnIfNeeded() {
-    if (_state.winnerId != null) return;
-    final currentTurnId = _state.playerIds[_state.currentTurnIndex];
-    final user = ref.read(authProvider).valueOrNull;
-    final myId = user?.id ?? _state.playerIds.first;
 
-    if (currentTurnId != myId) {
-      Future.delayed(const Duration(milliseconds: 700), () {
-        if (!mounted) return;
-        final botHand = _state.hands[currentTurnId] ?? [];
-
-        // Find legal play
-        final legalCards = botHand.where((c) {
-          if (c.isWild) return true;
-          if (c.color == _state.activeColor) return true;
-          if (c.value == _state.topDiscard.value) return true;
-          return false;
-        }).toList();
-
-        if (legalCards.isNotEmpty) {
-          final cardToPlay = legalCards.first;
-          final botAction = PlayerAction(
-            actionId: const Uuid().v4(),
-            playerId: currentTurnId,
-            activityId: 'uno',
-            type: 'play_card',
-            payload: {
-              'card': cardToPlay.toMap(),
-              'chosenColor': UnoColor.blue.name,
-            },
-            clientSequence: _state.version,
-          );
-          setState(() {
-            _state = _engine.applyAction(_state, botAction);
-          });
-          AudioService.playCardPlay();
-        } else {
-          // Draw card
-          final botAction = PlayerAction(
-            actionId: const Uuid().v4(),
-            playerId: currentTurnId,
-            activityId: 'uno',
-            type: 'draw_card',
-            payload: {},
-            clientSequence: _state.version,
-          );
-          setState(() {
-            _state = _engine.applyAction(_state, botAction);
-          });
-        }
-        _triggerBotTurnIfNeeded();
-      });
-    }
-  }
 
   void _promptWildColorChoice(UnoCard card) {
     showDialog(

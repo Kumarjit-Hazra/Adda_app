@@ -73,8 +73,8 @@ void main() {
     await tester.tap(find.text('Card Classics'));
     await tester.pumpAndSettle();
 
-    // Verify '29 Cards' is visible and 'Brain Arena' is filtered out
-    expect(find.text('29 Cards'), findsOneWidget);
+    // Verify '29 (Twenty-Nine)' is visible and 'Brain Arena' is filtered out
+    expect(find.text('29 (Twenty-Nine)'), findsOneWidget);
     expect(find.text('Brain Arena'), findsNothing);
 
     // Switch to Chat tab
@@ -91,8 +91,8 @@ void main() {
     await tester.tap(find.text('Play'));
     await tester.pumpAndSettle();
 
-    // Verify state was PRESERVED: '29 Cards' is still displayed and 'Brain Arena' is still filtered out!
-    expect(find.text('29 Cards'), findsOneWidget);
+    // Verify state was PRESERVED: '29 (Twenty-Nine)' is still displayed and 'Brain Arena' is still filtered out!
+    expect(find.text('29 (Twenty-Nine)'), findsOneWidget);
     expect(find.text('Brain Arena'), findsNothing);
   });
 

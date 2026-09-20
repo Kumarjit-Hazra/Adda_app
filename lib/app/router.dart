@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../features/chat/presentation/screens/chat_screen.dart';
 import '../features/discover/presentation/screens/discover_screen.dart';
+import '../features/games/twenty_nine/presentation/twenty_nine_game_screen.dart';
 import '../features/hangout/presentation/screens/hangout_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/play/presentation/screens/play_screen.dart';
@@ -100,6 +101,24 @@ final appRouter = GoRouter(
         final spaceId = state.pathParameters['id'] ?? 'space_main';
         final spaceName = (state.extra as String?) ?? 'Adda Space';
         return RoomScreen(spaceId: spaceId, spaceName: spaceName);
+      },
+    ),
+
+    // Solo Game Route (Independent gameplay without RoomSession)
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/play/solo/:gameId',
+      builder: (context, state) {
+        final gameId = state.pathParameters['gameId'] ?? '';
+        switch (gameId) {
+          case 'twenty_nine':
+            return const TwentyNineGameScreen();
+          default:
+            return Scaffold(
+              appBar: AppBar(title: Text('Unknown Game: $gameId')),
+              body: const Center(child: Text('Game not available for solo play')),
+            );
+        }
       },
     ),
   ],

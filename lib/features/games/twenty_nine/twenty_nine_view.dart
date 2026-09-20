@@ -52,64 +52,11 @@ class _TwentyNineViewState extends ConsumerState<TwentyNineView> {
       AudioService.playCardPlay();
       HapticsService.cardPlay();
 
-      // If it's bots' turn, auto-play bot action after a short realistic delay
-      _triggerBotTurnIfNeeded();
+      HapticsService.cardPlay();
     }
   }
 
-  void _triggerBotTurnIfNeeded() {
-    if (_state.phase == TwentyNinePhase.finished) return;
-    final currentTurnId = _state.playerIds[_state.currentTurnIndex];
-    final user = ref.read(authProvider).valueOrNull;
-    final myId = user?.id ?? _state.playerIds.first;
 
-    if (currentTurnId != myId) {
-      Future.delayed(const Duration(milliseconds: 600), () {
-        if (!mounted) return;
-        final botHand = _state.hands[currentTurnId] ?? [];
-
-        if (_state.phase == TwentyNinePhase.bidding) {
-          // Bot passes or bids
-          final botAction = PlayerAction(
-            actionId: const Uuid().v4(),
-            playerId: currentTurnId,
-            activityId: 'twenty_nine',
-            type: 'bid',
-            payload: {'pass': true},
-            clientSequence: _state.version,
-          );
-          setState(() {
-            _state = _engine.applyAction(_state, botAction);
-          });
-          _triggerBotTurnIfNeeded();
-        } else if (_state.phase == TwentyNinePhase.playing &&
-            botHand.isNotEmpty) {
-          // Play legal card
-          PlayingCard cardToPlay = botHand.first;
-          if (_state.currentTrick.isNotEmpty) {
-            final leadSuit = _state.currentTrick.first.card.suit;
-            final match = botHand.where((c) => c.suit == leadSuit).toList();
-            if (match.isNotEmpty) cardToPlay = match.first;
-          }
-
-          final botAction = PlayerAction(
-            actionId: const Uuid().v4(),
-            playerId: currentTurnId,
-            activityId: 'twenty_nine',
-            type: 'play_card',
-            payload: {'card': cardToPlay.toMap()},
-            clientSequence: _state.version,
-          );
-
-          setState(() {
-            _state = _engine.applyAction(_state, botAction);
-          });
-          AudioService.playCardPlay();
-          _triggerBotTurnIfNeeded();
-        }
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

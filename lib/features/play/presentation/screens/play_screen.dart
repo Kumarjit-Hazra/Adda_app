@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../features/activities/engine/activity_definition.dart';
+import '../../../../features/games/domain/game_registry.dart';
 import '../../../../shared/design_system/tokens/colors.dart';
 import '../../../../shared/design_system/tokens/radius.dart';
 import '../../../../shared/design_system/tokens/spacing.dart';
 import '../../../../shared/design_system/widgets/adda_top_bar.dart';
+import '../../../../shared/design_system/widgets/app_button.dart';
 import '../../../../shared/design_system/widgets/app_scaffold.dart';
 import '../../../../shared/design_system/widgets/surface_card.dart';
 
@@ -25,111 +28,45 @@ class _PlayScreenState extends State<PlayScreen> {
     'Co-op Mystery',
   ];
 
-  final List<Map<String, dynamic>> _games = const [
-    {
-      'id': '29_cards',
-      'title': '29 Cards',
-      'category': 'Card Classics',
-      'badge': 'FLAGSHIP',
-      'players': '4 Players',
-      'duration': '15 min',
-      'color': AddaColors.coral,
-      'icon': Icons.style_rounded,
-      'description':
-          'The legendary South Asian trick-taking card battle with jacks and nines.',
-    },
-    {
-      'id': 'uno_clash',
-      'title': 'UNO Clash',
-      'category': 'Card Classics',
-      'badge': 'POPULAR',
-      'players': '2-6 Players',
-      'duration': '10 min',
-      'color': AddaColors.amber,
-      'icon': Icons.filter_none_rounded,
-      'description':
-          'Color matches, reverse chaos, and draw-four faceoffs with friends.',
-    },
-    {
-      'id': 'bluff_masters',
-      'title': 'Bluff Masters',
-      'category': 'Party & Deception',
-      'badge': 'SOCIAL',
-      'players': '3-8 Players',
-      'duration': '12 min',
-      'color': AddaColors.rose,
-      'icon': Icons.psychology_alt_rounded,
-      'description':
-          'Call bluffs, disguise high cards, and catch lying friends red-handed.',
-    },
-    {
-      'id': 'teen_patti',
-      'title': 'Teen Patti',
-      'category': 'Card Classics',
-      'badge': 'EXPRESS',
-      'players': '3-6 Players',
-      'duration': '8 min',
-      'color': AddaColors.emerald,
-      'icon': Icons.monetization_on_rounded,
-      'description':
-          'Flash, pure sequence, and trail showdowns with virtual chips.',
-    },
-    {
-      'id': 'rummy_rush',
-      'title': 'Rummy Rush',
-      'category': 'Card Classics',
-      'badge': 'STRATEGY',
-      'players': '2-4 Players',
-      'duration': '15 min',
-      'color': AddaColors.cyan,
-      'icon': Icons.dashboard_customize_rounded,
-      'description':
-          'Form pure sequences, sets, and declare your hand before rivals.',
-    },
-    {
-      'id': 'mafia_city',
-      'title': 'Mafia: Nightfall',
-      'category': 'Party & Deception',
-      'badge': 'ROLEPLAY',
-      'players': '5-12 Players',
-      'duration': '20 min',
-      'color': AddaColors.violet,
-      'icon': Icons.nights_stay_rounded,
-      'description':
-          'Villagers vs Mafia. Secret votes, detective sleuthing, and doctor saves.',
-    },
-    {
-      'id': 'brain_arena',
-      'title': 'Brain Arena',
-      'category': 'Brain & Logic',
-      'badge': 'COMPETITIVE',
-      'players': '1-8 Players',
-      'duration': '5 min',
-      'color': AddaColors.amber,
-      'icon': Icons.bolt_rounded,
-      'description':
-          'Rapid-fire pattern recognition, mental math, and memory duels.',
-    },
-    {
-      'id': 'coop_puzzle',
-      'title': 'Mystery Crypt',
-      'category': 'Co-op Mystery',
-      'badge': 'CO-OP',
-      'players': '2-4 Players',
-      'duration': '18 min',
-      'color': Color(0xFF3B82F6),
-      'icon': Icons.extension_rounded,
-      'description':
-          'Escape rooms with asymmetric clues where voice communication is key.',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    GameRegistry.initialize();
+  }
+
+  List<GameDefinition> get _filteredGames {
+    final allGames = GameRegistry.getAllDefinitions();
+    if (_selectedCategory == 'All Games') return allGames;
+    
+    // Map display category names to enum values
+    ActivityCategory? targetCategory;
+    switch (_selectedCategory) {
+      case 'Card Classics':
+        targetCategory = ActivityCategory.cards;
+        break;
+      case 'Party & Deception':
+        targetCategory = ActivityCategory.party;
+        break;
+      case 'Brain & Logic':
+        targetCategory = ActivityCategory.brain;
+        break;
+      case 'Co-op Mystery':
+        targetCategory = ActivityCategory.mystery;
+        break;
+    }
+    
+    if (targetCategory == null) return allGames;
+    return allGames.where((g) => g.category == targetCategory).toList();
+  }
+
+  bool _supportsSoloPlay(String gameId) {
+    // Currently only Twenty-Nine supports solo play via GameSession
+    return gameId == 'twenty_nine';
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final filteredGames = _selectedCategory == 'All Games'
-        ? _games
-        : _games.where((g) => g['category'] == _selectedCategory).toList();
 
     return AppScaffold(
       appBar: const AddaTopBar(
@@ -282,8 +219,9 @@ class _PlayScreenState extends State<PlayScreen> {
             padding: const EdgeInsets.symmetric(horizontal: AddaSpacing.lg),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
-                final game = filteredGames[index];
-                final Color color = game['color'] as Color;
+                final game = _filteredGames[index];
+                final Color color = _getColorForCategory(game.category);
+                final bool soloAvailable = _supportsSoloPlay(game.id);
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: SurfaceCard(
@@ -299,7 +237,7 @@ class _PlayScreenState extends State<PlayScreen> {
                             borderRadius: AddaRadius.radiusMd,
                           ),
                           child: Icon(
-                            game['icon'] as IconData,
+                            _getIconForGame(game.id),
                             color: color,
                             size: 28,
                           ),
@@ -312,7 +250,7 @@ class _PlayScreenState extends State<PlayScreen> {
                               Row(
                                 children: [
                                   Text(
-                                    game['title'] as String,
+                                    game.title,
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
@@ -329,7 +267,7 @@ class _PlayScreenState extends State<PlayScreen> {
                                       borderRadius: AddaRadius.radiusXs,
                                     ),
                                     child: Text(
-                                      game['badge'] as String,
+                                      game.badge ?? '',
                                       style: TextStyle(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w800,
@@ -337,11 +275,32 @@ class _PlayScreenState extends State<PlayScreen> {
                                       ),
                                     ),
                                   ),
+                                  if (soloAvailable) ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AddaColors.emerald.withAlpha(30),
+                                        borderRadius: AddaRadius.radiusXs,
+                                      ),
+                                      child: const Text(
+                                        'SOLO',
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w800,
+                                          color: AddaColors.emerald,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                game['description'] as String,
+                                game.description ?? '',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: isDark
@@ -363,7 +322,7 @@ class _PlayScreenState extends State<PlayScreen> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    game['players'] as String,
+                                    game.playerRange,
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: isDark
@@ -381,7 +340,7 @@ class _PlayScreenState extends State<PlayScreen> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    game['duration'] as String,
+                                    game.durationLabel,
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: isDark
@@ -395,15 +354,23 @@ class _PlayScreenState extends State<PlayScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          color: isDark ? Colors.white38 : Colors.black38,
-                        ),
+                        if (soloAvailable)
+                          AppButton(
+                            text: 'Play Solo',
+                            height: 36,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            onPressed: () => context.go('/play/solo/${game.id}'),
+                          )
+                        else
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
                       ],
                     ),
                   ),
                 );
-              }, childCount: filteredGames.length),
+              }, childCount: _filteredGames.length),
             ),
           ),
 
@@ -411,5 +378,55 @@ class _PlayScreenState extends State<PlayScreen> {
         ],
       ),
     );
+  }
+
+  Color _getColorForCategory(ActivityCategory category) {
+    switch (category) {
+      case ActivityCategory.cards:
+        return AddaColors.coral;
+      case ActivityCategory.party:
+        return AddaColors.rose;
+      case ActivityCategory.brain:
+        return AddaColors.amber;
+      case ActivityCategory.mystery:
+        return const Color(0xFF3B82F6);
+      case ActivityCategory.creative:
+        return AddaColors.violet;
+      case ActivityCategory.couple:
+        return AddaColors.emerald;
+      case ActivityCategory.study:
+        return AddaColors.cyan;
+    }
+  }
+
+  IconData _getIconForGame(String gameId) {
+    switch (gameId) {
+      case 'twenty_nine':
+        return Icons.style_rounded;
+      case 'uno':
+        return Icons.filter_none_rounded;
+      case 'bluff':
+        return Icons.psychology_alt_rounded;
+      case 'rummy':
+        return Icons.dashboard_customize_rounded;
+      case 'teen_patti':
+        return Icons.monetization_on_rounded;
+      case 'mafia':
+        return Icons.nights_stay_rounded;
+      case 'brain_arena':
+        return Icons.bolt_rounded;
+      case 'quiz':
+        return Icons.quiz_rounded;
+      case 'coop_puzzle':
+        return Icons.extension_rounded;
+      case 'draw_guess':
+        return Icons.draw_rounded;
+      case 'couple_mode':
+        return Icons.favorite_rounded;
+      case 'watch_together':
+        return Icons.tv_rounded;
+      default:
+        return Icons.sports_esports_rounded;
+    }
   }
 }

@@ -51,45 +51,10 @@ class _BluffViewState extends ConsumerState<BluffView> {
       });
       AudioService.playCardPlay();
       HapticsService.cardPlay();
-
-      _triggerBotTurnIfNeeded();
     }
   }
 
-  void _triggerBotTurnIfNeeded() {
-    if (_state.winnerId != null) return;
-    final currentTurnId = _state.playerIds[_state.currentTurnIndex];
-    final user = ref.read(authProvider).valueOrNull;
-    final myId = user?.id ?? _state.playerIds.first;
 
-    if (currentTurnId != myId) {
-      Future.delayed(const Duration(milliseconds: 900), () {
-        if (!mounted) return;
-        final botHand = _state.hands[currentTurnId] ?? [];
-        if (botHand.isEmpty) return;
-
-        // Bot plays 1-2 cards
-        final playCount = (botHand.length >= 2 && botHand.length % 2 == 0)
-            ? 2
-            : 1;
-        final chosen = botHand.take(playCount).toList();
-
-        final botAction = PlayerAction(
-          actionId: const Uuid().v4(),
-          playerId: currentTurnId,
-          activityId: 'bluff',
-          type: 'play_cards',
-          payload: {'cards': chosen.map((c) => c.toMap()).toList()},
-          clientSequence: _state.version,
-        );
-
-        setState(() {
-          _state = _engine.applyAction(_state, botAction);
-        });
-        AudioService.playCardPlay();
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
