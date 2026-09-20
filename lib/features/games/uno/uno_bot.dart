@@ -14,7 +14,7 @@ class UnoBotPlayer extends BotPlayer<UnoState> {
   @override
   PlayerAction? computeNextAction(UnoState state) {
     if (state.winnerId != null) return null;
-    
+
     final currentTurnId = state.playerIds[state.currentTurnIndex];
     if (currentTurnId != playerId) return null;
 
@@ -33,7 +33,9 @@ class UnoBotPlayer extends BotPlayer<UnoState> {
       final cardToPlay = legalCards[random.nextInt(legalCards.length)];
       UnoColor? chosenColor;
       if (cardToPlay.isWild) {
-        final colors = UnoColor.values.where((c) => c != UnoColor.wild).toList();
+        final colors = UnoColor.values
+            .where((c) => c != UnoColor.wild)
+            .toList();
         chosenColor = colors[random.nextInt(colors.length)];
       }
 

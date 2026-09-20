@@ -54,8 +54,6 @@ class _BluffViewState extends ConsumerState<BluffView> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).valueOrNull;

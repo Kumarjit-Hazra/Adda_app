@@ -14,7 +14,7 @@ class TwentyNineBotPlayer extends BotPlayer<TwentyNineState> {
   @override
   PlayerAction? computeNextAction(TwentyNineState state) {
     if (state.phase == TwentyNinePhase.finished) return null;
-    
+
     final currentTurnId = state.playerIds[state.currentTurnIndex];
     if (currentTurnId != playerId) return null;
 

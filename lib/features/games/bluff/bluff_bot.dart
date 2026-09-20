@@ -14,7 +14,7 @@ class BluffBotPlayer extends BotPlayer<BluffState> {
   @override
   PlayerAction? computeNextAction(BluffState state) {
     if (state.winnerId != null) return null;
-    
+
     final currentTurnId = state.playerIds[state.currentTurnIndex];
     if (currentTurnId != playerId) return null;
 
@@ -24,7 +24,7 @@ class BluffBotPlayer extends BotPlayer<BluffState> {
     // Bot plays 1 to 3 random cards
     final maxPlay = hand.length > 3 ? 3 : hand.length;
     final playCount = random.nextInt(maxPlay) + 1;
-    
+
     final chosen = List.of(hand)..shuffle(random);
     final selectedCards = chosen.take(playCount).toList();
 

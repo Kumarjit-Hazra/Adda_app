@@ -7,7 +7,11 @@ import 'package:adda/features/activities/engine/bot_player.dart';
 void main() {
   group('BluffBotPlayer Tests', () {
     final random = Random(42);
-    final bot = BluffBotPlayer(playerId: 'bot1', difficulty: BotDifficulty.medium, random: random);
+    final bot = BluffBotPlayer(
+      playerId: 'bot1',
+      difficulty: BotDifficulty.medium,
+      random: random,
+    );
 
     test('returns null if winner is declared', () {
       final state = BluffState(
@@ -19,7 +23,7 @@ void main() {
         version: 1,
         winnerId: 'p2',
       );
-      
+
       final action = bot.computeNextAction(state);
       expect(action, isNull);
     });
@@ -33,14 +37,14 @@ void main() {
             const BluffCard(BluffRank.five, 1),
             const BluffCard(BluffRank.six, 0),
             const BluffCard(BluffRank.king, 3),
-          ]
+          ],
         },
         centerPile: [],
         currentTurnIndex: 0,
         currentRankRequirement: BluffRank.ace,
         version: 1,
       );
-      
+
       final action = bot.computeNextAction(state);
       expect(action, isNotNull);
       expect(action!.type, 'play_cards');

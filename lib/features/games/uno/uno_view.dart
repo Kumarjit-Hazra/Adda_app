@@ -52,8 +52,6 @@ class _UnoViewState extends ConsumerState<UnoView> {
     }
   }
 
-
-
   void _promptWildColorChoice(UnoCard card) {
     showDialog(
       context: context,

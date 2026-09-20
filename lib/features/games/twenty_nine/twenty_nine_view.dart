@@ -56,8 +56,6 @@ class _TwentyNineViewState extends ConsumerState<TwentyNineView> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).valueOrNull;

@@ -23,7 +23,8 @@ class MockEngine implements ActivityEngine<String> {
   String createInitialState(List<String> playerIds) => 'state_1';
 
   @override
-  bool validateAction(String state, PlayerAction action) => action.type == 'valid';
+  bool validateAction(String state, PlayerAction action) =>
+      action.type == 'valid';
 
   @override
   String applyAction(String state, PlayerAction action) => 'state_2';
@@ -53,15 +54,23 @@ void main() {
       maxPlayers: 2,
       estimatedDuration: const Duration(minutes: 5),
     );
-    final localUser = UserProfile(id: 'u1', name: 'Test', createdAt: DateTime.now());
+    final localUser = UserProfile(
+      id: 'u1',
+      name: 'Test',
+      createdAt: DateTime.now(),
+    );
     final players = [
       GamePlayer.human(id: 'u1', name: 'Player 1', isHost: true),
       GamePlayer.bot(id: 'b1', name: 'Bot 1'),
     ];
 
     test('createSoloSession initializes and schedules bot', () async {
-      final notifier = GameSessionNotifier(engine, definition, mode: GameSessionMode.solo);
-      
+      final notifier = GameSessionNotifier(
+        engine,
+        definition,
+        mode: GameSessionMode.solo,
+      );
+
       await notifier.createSoloSession(players: players, localUser: localUser);
 
       final session = notifier.state;
@@ -69,42 +78,56 @@ void main() {
       expect(session!.mode, GameSessionMode.solo);
       expect(session.state, 'state_1');
       expect(session.status, GameSessionStatus.playing);
-      
-      notifier.dispose();
-    });
-
-    test('dispatchAction processes valid action and transitions state', () async {
-      final notifier = GameSessionNotifier(engine, definition, mode: GameSessionMode.solo);
-      await notifier.createSoloSession(players: players, localUser: localUser);
-
-      final action = PlayerAction(
-        actionId: 'a1',
-        playerId: 'u1',
-        activityId: 'mock',
-        type: 'valid',
-        payload: {},
-        clientSequence: 1,
-      );
-
-      final success = notifier.dispatchAction(action);
-
-      expect(success, isTrue);
-      
-      final session = notifier.state!;
-      expect(session.state, 'state_2');
-      expect(session.version, 2);
-      expect(session.actionHistory.length, 1);
-      
-      // Since it's finished
-      expect(session.status, GameSessionStatus.finished);
-      expect(session.result, isNotNull);
-      expect(session.result!.winnerIds, contains('u1'));
 
       notifier.dispose();
     });
+
+    test(
+      'dispatchAction processes valid action and transitions state',
+      () async {
+        final notifier = GameSessionNotifier(
+          engine,
+          definition,
+          mode: GameSessionMode.solo,
+        );
+        await notifier.createSoloSession(
+          players: players,
+          localUser: localUser,
+        );
+
+        final action = PlayerAction(
+          actionId: 'a1',
+          playerId: 'u1',
+          activityId: 'mock',
+          type: 'valid',
+          payload: {},
+          clientSequence: 1,
+        );
+
+        final success = notifier.dispatchAction(action);
+
+        expect(success, isTrue);
+
+        final session = notifier.state!;
+        expect(session.state, 'state_2');
+        expect(session.version, 2);
+        expect(session.actionHistory.length, 1);
+
+        // Since it's finished
+        expect(session.status, GameSessionStatus.finished);
+        expect(session.result, isNotNull);
+        expect(session.result!.winnerIds, contains('u1'));
+
+        notifier.dispose();
+      },
+    );
 
     test('dispatchAction rejects invalid action', () async {
-      final notifier = GameSessionNotifier(engine, definition, mode: GameSessionMode.solo);
+      final notifier = GameSessionNotifier(
+        engine,
+        definition,
+        mode: GameSessionMode.solo,
+      );
       await notifier.createSoloSession(players: players, localUser: localUser);
 
       final action = PlayerAction(
@@ -119,7 +142,7 @@ void main() {
       final success = notifier.dispatchAction(action);
 
       expect(success, isFalse);
-      
+
       final session = notifier.state!;
       expect(session.state, 'state_1'); // Unchanged
       expect(session.version, 1);
@@ -128,7 +151,11 @@ void main() {
     });
 
     test('rematch resets session correctly', () async {
-      final notifier = GameSessionNotifier(engine, definition, mode: GameSessionMode.solo);
+      final notifier = GameSessionNotifier(
+        engine,
+        definition,
+        mode: GameSessionMode.solo,
+      );
       await notifier.createSoloSession(players: players, localUser: localUser);
 
       final action = PlayerAction(
@@ -155,7 +182,11 @@ void main() {
     });
 
     test('cancel session sets status to cancelled', () async {
-      final notifier = GameSessionNotifier(engine, definition, mode: GameSessionMode.solo);
+      final notifier = GameSessionNotifier(
+        engine,
+        definition,
+        mode: GameSessionMode.solo,
+      );
       await notifier.createSoloSession(players: players, localUser: localUser);
 
       notifier.cancel();

@@ -116,7 +116,9 @@ final appRouter = GoRouter(
           default:
             return Scaffold(
               appBar: AppBar(title: Text('Unknown Game: $gameId')),
-              body: const Center(child: Text('Game not available for solo play')),
+              body: const Center(
+                child: Text('Game not available for solo play'),
+              ),
             );
         }
       },

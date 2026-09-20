@@ -7,7 +7,11 @@ import 'package:adda/features/activities/engine/bot_player.dart';
 void main() {
   group('TwentyNineBotPlayer Tests', () {
     final random = Random(42);
-    final bot = TwentyNineBotPlayer(playerId: 'bot1', difficulty: BotDifficulty.medium, random: random);
+    final bot = TwentyNineBotPlayer(
+      playerId: 'bot1',
+      difficulty: BotDifficulty.medium,
+      random: random,
+    );
 
     test('returns null if finished', () {
       final state = TwentyNineState(
@@ -21,7 +25,7 @@ void main() {
         completedTricks: [],
         teamTrickPoints: {0: 0, 1: 0},
       );
-      
+
       final action = bot.computeNextAction(state);
       expect(action, isNull);
     });
@@ -38,7 +42,7 @@ void main() {
         completedTricks: [],
         teamTrickPoints: {0: 0, 1: 0},
       );
-      
+
       final action = bot.computeNextAction(state);
       expect(action, isNotNull);
       expect(action!.type, 'bid');
@@ -52,19 +56,22 @@ void main() {
           'bot1': [
             const PlayingCard(CardSuit.spades, CardRank.jack),
             const PlayingCard(CardSuit.hearts, CardRank.nine),
-          ]
+          ],
         },
         currentTurnIndex: 1,
         phase: TwentyNinePhase.playing,
         currentTrick: [
-          const PlayedTrickCard(playerId: 'p2', card: PlayingCard(CardSuit.hearts, CardRank.jack))
+          const PlayedTrickCard(
+            playerId: 'p2',
+            card: PlayingCard(CardSuit.hearts, CardRank.jack),
+          ),
         ],
         version: 1,
         highestBid: 16,
         completedTricks: [],
         teamTrickPoints: {0: 0, 1: 0},
       );
-      
+
       final action = bot.computeNextAction(state);
       expect(action, isNotNull);
       expect(action!.type, 'play_card');

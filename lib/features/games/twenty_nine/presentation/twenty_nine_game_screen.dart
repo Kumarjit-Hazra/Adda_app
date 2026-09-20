@@ -21,7 +21,8 @@ class TwentyNineGameScreen extends ConsumerStatefulWidget {
   const TwentyNineGameScreen({super.key});
 
   @override
-  ConsumerState<TwentyNineGameScreen> createState() => _TwentyNineGameScreenState();
+  ConsumerState<TwentyNineGameScreen> createState() =>
+      _TwentyNineGameScreenState();
 }
 
 class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
@@ -40,7 +41,9 @@ class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
     final user = ref.read(authProvider).valueOrNull;
     if (user == null) return;
 
-    final notifier = ref.read(gameSessionNotifierProvider('twenty_nine').notifier);
+    final notifier = ref.read(
+      gameSessionNotifierProvider('twenty_nine').notifier,
+    );
 
     // Create players: human + 3 bots
     final players = [
@@ -51,21 +54,9 @@ class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
         isHost: true,
         teamIndex: 0,
       ),
-      GamePlayer.bot(
-        id: 'bot_1',
-        name: 'Kabir Bot 🤖',
-        teamIndex: 1,
-      ),
-      GamePlayer.bot(
-        id: 'bot_2',
-        name: 'Diya Bot 🤖',
-        teamIndex: 0,
-      ),
-      GamePlayer.bot(
-        id: 'bot_3',
-        name: 'Aarav Bot 🤖',
-        teamIndex: 1,
-      ),
+      GamePlayer.bot(id: 'bot_1', name: 'Kabir Bot 🤖', teamIndex: 1),
+      GamePlayer.bot(id: 'bot_2', name: 'Diya Bot 🤖', teamIndex: 0),
+      GamePlayer.bot(id: 'bot_3', name: 'Aarav Bot 🤖', teamIndex: 1),
     ];
 
     await notifier.createSoloSession(players: players, localUser: user);
@@ -87,14 +78,14 @@ class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
       clientSequence: session.version,
     );
 
-    final notifier = ref.read(gameSessionNotifierProvider('twenty_nine').notifier);
+    final notifier = ref.read(
+      gameSessionNotifierProvider('twenty_nine').notifier,
+    );
     if (notifier.dispatchAction(action)) {
       AudioService.playCardPlay();
       HapticsService.cardPlay();
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -104,13 +95,19 @@ class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
 
     if (session == null) {
       return AppScaffold(
-        appBar: const AddaTopBar(contextBadge: 'ARCADE', contextTitle: '29 Cards'),
-        body: const Center(child: CircularProgressIndicator(color: AddaColors.coral)),
+        appBar: const AddaTopBar(
+          contextBadge: 'ARCADE',
+          contextTitle: '29 Cards',
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(color: AddaColors.coral),
+        ),
       );
     }
 
     final myHand = session.state.hands[myId] ?? [];
-    final currentTurnPlayer = session.state.playerIds[session.state.currentTurnIndex];
+    final currentTurnPlayer =
+        session.state.playerIds[session.state.currentTurnIndex];
     final isMyTurn = currentTurnPlayer == myId;
 
     return AppScaffold(
@@ -122,7 +119,9 @@ class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
             IconButton(
               icon: const Icon(Icons.refresh_rounded, color: AddaColors.coral),
               onPressed: () {
-                ref.read(gameSessionNotifierProvider('twenty_nine').notifier).rematch();
+                ref
+                    .read(gameSessionNotifierProvider('twenty_nine').notifier)
+                    .rematch();
               },
               tooltip: 'Rematch',
             ),
@@ -147,7 +146,10 @@ class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: SurfaceCard(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 backgroundColor: Colors.black.withAlpha(90),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -256,7 +258,10 @@ class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
                                 ),
                               ),
                             ...session.state.currentTrick.map((t) {
-                              return _buildCardTile(t.card, isCenterTrick: true);
+                              return _buildCardTile(
+                                t.card,
+                                isCenterTrick: true,
+                              );
                             }),
                           ],
                         ),
@@ -280,7 +285,10 @@ class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
             // Trump and Action Banner
             if (session.state.phase == TwentyNinePhase.playing)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -298,7 +306,10 @@ class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
                         children: [
                           const Text(
                             'Trump: ',
-                            style: TextStyle(fontSize: 12, color: Colors.white70),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white70,
+                            ),
                           ),
                           if (session.state.isTrumpRevealed &&
                               session.state.trumpSuit != null) ...[
@@ -359,10 +370,15 @@ class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
                       ),
                     ),
                     Slider(
-                      value: (_bidSelection.clamp(session.state.highestBid + 1, 28)).toDouble(),
+                      value: (_bidSelection.clamp(
+                        session.state.highestBid + 1,
+                        28,
+                      )).toDouble(),
                       min: (session.state.highestBid + 1).toDouble(),
                       max: 28.0,
-                      divisions: (28 - (session.state.highestBid + 1)).clamp(1, 12).toInt(),
+                      divisions: (28 - (session.state.highestBid + 1))
+                          .clamp(1, 12)
+                          .toInt(),
                       activeColor: AddaColors.amber,
                       onChanged: (val) =>
                           setState(() => _bidSelection = val.toInt()),
@@ -413,7 +429,13 @@ class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
                     AppButton(
                       text: 'Rematch 🔄',
                       onPressed: () {
-                        ref.read(gameSessionNotifierProvider('twenty_nine').notifier).rematch();
+                        ref
+                            .read(
+                              gameSessionNotifierProvider(
+                                'twenty_nine',
+                              ).notifier,
+                            )
+                            .rematch();
                       },
                     ),
                   ],
@@ -433,7 +455,9 @@ class _TwentyNineGameScreenState extends ConsumerState<TwentyNineGameScreen> {
                   itemBuilder: (context, index) {
                     final card = myHand[index];
                     return GestureDetector(
-                      onTap: isMyTurn && session.state.phase == TwentyNinePhase.playing
+                      onTap:
+                          isMyTurn &&
+                              session.state.phase == TwentyNinePhase.playing
                           ? () => _dispatch('play_card', {'card': card.toMap()})
                           : null,
                       child: _buildCardTile(card, isMyTurn: isMyTurn),

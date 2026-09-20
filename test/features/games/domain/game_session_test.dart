@@ -43,7 +43,11 @@ class MockEngine implements ActivityEngine<String> {
 void main() {
   group('GameSession Tests', () {
     final engine = MockEngine();
-    final localUser = UserProfile(id: 'u1', name: 'Test', createdAt: DateTime.now());
+    final localUser = UserProfile(
+      id: 'u1',
+      name: 'Test',
+      createdAt: DateTime.now(),
+    );
     final players = [
       GamePlayer.human(id: 'u1', name: 'Player 1', isHost: true),
       GamePlayer.bot(id: 'b1', name: 'Bot 1'),
@@ -115,16 +119,16 @@ void main() {
       );
 
       final jsonStr = bundle.toJson();
-      
+
       // Deserialize
       final decodedMap = jsonDecode(jsonStr);
       final decoded = GameSessionBundle(
         session: GameSession.fromMap(decodedMap['session']),
         serializedEngineState: decodedMap['engineState'],
       );
-      
+
       final restoredSession = decoded.session.copyWith(
-        state: engine.deserialize(decoded.serializedEngineState)
+        state: engine.deserialize(decoded.serializedEngineState),
       );
 
       expect(restoredSession.sessionId, session.sessionId);

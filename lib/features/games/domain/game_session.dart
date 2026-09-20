@@ -8,8 +8,10 @@ import '../../auth/domain/models/user_profile.dart';
 enum GameSessionMode {
   /// Solo play against bots (no networking, no WebRTC)
   solo,
+
   /// Local pass-and-play on a single device
   local,
+
   /// Multiplayer over network (requires RoomSession for social context)
   multiplayer,
 }
@@ -18,12 +20,16 @@ enum GameSessionMode {
 enum GameSessionStatus {
   /// Session is being initialized
   initializing,
+
   /// Waiting for players to join (multiplayer)
   waitingForPlayers,
+
   /// Game is actively being played
   playing,
+
   /// Game has finished with a result
   finished,
+
   /// Session was cancelled/abandoned
   cancelled,
 }
@@ -193,7 +199,9 @@ class GameSession {
   }
 
   /// Returns true if the session is active (playing or waiting).
-  bool get isActive => status == GameSessionStatus.playing || status == GameSessionStatus.waitingForPlayers;
+  bool get isActive =>
+      status == GameSessionStatus.playing ||
+      status == GameSessionStatus.waitingForPlayers;
 
   /// Returns true if the game has finished.
   bool get isFinished => status == GameSessionStatus.finished;
@@ -255,16 +263,28 @@ class GameSession {
       sessionId: map['sessionId'] as String,
       gameId: map['gameId'] as String,
       activityId: map['activityId'] as String,
-      players: (map['players'] as List).map((p) => GamePlayer.fromMap(p as Map<String, dynamic>)).toList(),
+      players: (map['players'] as List)
+          .map((p) => GamePlayer.fromMap(p as Map<String, dynamic>))
+          .toList(),
       state: null, // State deserialization is engine-specific
-      status: GameSessionStatus.values.firstWhere((s) => s.name == map['status']),
+      status: GameSessionStatus.values.firstWhere(
+        (s) => s.name == map['status'],
+      ),
       mode: GameSessionMode.values.firstWhere((m) => m.name == map['mode']),
       hostId: map['hostId'] as String?,
-      result: map['result'] != null ? GameResult.fromMap(map['result'] as Map<String, dynamic>) : null,
-      actionHistory: (map['actionHistory'] as List).map((a) => PlayerAction.fromMap(a as Map<String, dynamic>)).toList(),
+      result: map['result'] != null
+          ? GameResult.fromMap(map['result'] as Map<String, dynamic>)
+          : null,
+      actionHistory: (map['actionHistory'] as List)
+          .map((a) => PlayerAction.fromMap(a as Map<String, dynamic>))
+          .toList(),
       createdAt: DateTime.parse(map['createdAt'] as String),
-      startedAt: map['startedAt'] != null ? DateTime.parse(map['startedAt'] as String) : null,
-      finishedAt: map['finishedAt'] != null ? DateTime.parse(map['finishedAt'] as String) : null,
+      startedAt: map['startedAt'] != null
+          ? DateTime.parse(map['startedAt'] as String)
+          : null,
+      finishedAt: map['finishedAt'] != null
+          ? DateTime.parse(map['finishedAt'] as String)
+          : null,
       version: map['version'] as int,
     );
   }
@@ -354,10 +374,7 @@ class GameSessionBundle {
   });
 
   Map<String, dynamic> toMap() {
-    return {
-      'session': session.toMap(),
-      'engineState': serializedEngineState,
-    };
+    return {'session': session.toMap(), 'engineState': serializedEngineState};
   }
 
   String toJson() => json.encode(toMap());

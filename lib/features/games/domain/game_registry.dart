@@ -22,7 +22,8 @@ import '../../games/watch_together/watch_together_engine.dart';
 class GameRegistry {
   static final Map<String, GameDefinition> _definitions = {};
   static final Map<String, ActivityEngine Function()> _engineFactories = {};
-  static final Map<String, BotPlayer Function(String, BotDifficulty)> _botFactories = {};
+  static final Map<String, BotPlayer Function(String, BotDifficulty)>
+  _botFactories = {};
   static bool _initialized = false;
 
   /// Initializes the registry with all built-in games.
@@ -39,7 +40,8 @@ class GameRegistry {
       maxPlayers: 4,
       estimatedDuration: const Duration(minutes: 15),
       engineFactory: () => TwentyNineEngine(),
-      botFactory: (playerId, difficulty) => TwentyNineBotPlayer(playerId: playerId, difficulty: difficulty),
+      botFactory: (playerId, difficulty) =>
+          TwentyNineBotPlayer(playerId: playerId, difficulty: difficulty),
     );
 
     _register(
@@ -51,7 +53,8 @@ class GameRegistry {
       maxPlayers: 6,
       estimatedDuration: const Duration(minutes: 10),
       engineFactory: () => UnoEngine(),
-      botFactory: (playerId, difficulty) => UnoBotPlayer(playerId: playerId, difficulty: difficulty),
+      botFactory: (playerId, difficulty) =>
+          UnoBotPlayer(playerId: playerId, difficulty: difficulty),
     );
 
     _register(
@@ -86,7 +89,8 @@ class GameRegistry {
       maxPlayers: 8,
       estimatedDuration: const Duration(minutes: 12),
       engineFactory: () => BluffEngine(),
-      botFactory: (playerId, difficulty) => BluffBotPlayer(playerId: playerId, difficulty: difficulty),
+      botFactory: (playerId, difficulty) =>
+          BluffBotPlayer(playerId: playerId, difficulty: difficulty),
     );
 
     _register(
@@ -215,9 +219,13 @@ class GameRegistry {
     }
     return factory();
   }
-  
+
   /// Creates a new bot instance for the given game ID.
-  static BotPlayer? createBot(String gameId, String playerId, [BotDifficulty difficulty = BotDifficulty.medium]) {
+  static BotPlayer? createBot(
+    String gameId,
+    String playerId, [
+    BotDifficulty difficulty = BotDifficulty.medium,
+  ]) {
     initialize();
     final factory = _botFactories[gameId];
     if (factory == null) return null;
@@ -231,7 +239,9 @@ class GameRegistry {
   }
 
   /// Returns definitions filtered by category.
-  static List<GameDefinition> getDefinitionsByCategory(ActivityCategory category) {
+  static List<GameDefinition> getDefinitionsByCategory(
+    ActivityCategory category,
+  ) {
     initialize();
     return _definitions.values.where((d) => d.category == category).toList();
   }
