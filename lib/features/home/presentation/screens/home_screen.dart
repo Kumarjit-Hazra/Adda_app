@@ -4,9 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../shared/design_system/tokens/colors.dart';
 import '../../../../shared/design_system/tokens/radius.dart';
 import '../../../../shared/design_system/tokens/spacing.dart';
-import '../../../../shared/design_system/widgets/app_avatar.dart';
 import '../../../../shared/design_system/widgets/app_button.dart';
 import '../../../../shared/design_system/widgets/app_scaffold.dart';
+
+import '../../../../shared/design_system/widgets/adda_top_bar.dart';
 import '../../../../shared/design_system/widgets/state_views.dart';
 import '../../../../shared/design_system/widgets/surface_card.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -27,6 +28,8 @@ class HomeScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AppScaffold(
+      appBar: const AddaTopBar(),
+
       // Floating persistent bar if currently connected to a room while browsing home!
       floatingOverlay: activeRoom != null
           ? GestureDetector(
@@ -98,55 +101,32 @@ class HomeScreen extends ConsumerWidget {
               // Header
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(AddaSpacing.lg),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AddaSpacing.lg,
+                    vertical: AddaSpacing.sm,
+                  ),
                   child: Row(
                     children: [
-                      AppAvatar(name: user.name, size: 48, isOnline: true),
-                      const SizedBox(width: AddaSpacing.md),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Hey, ${user.name} 👋',
-                              style: Theme.of(context).textTheme.headlineSmall,
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.w800),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
+                            const SizedBox(height: 2),
                             Text(
-                              user.statusMessage ?? 'Ready to hang out',
+                              user.statusMessage ??
+                                  'Ready to hang out and play games',
                               style: TextStyle(
                                 fontSize: 13,
                                 color: isDark
                                     ? AddaColors.textSecondaryDark
                                     : AddaColors.textSecondaryLight,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AddaColors.coral.withAlpha(25),
-                          borderRadius: AddaRadius.radiusFull,
-                          border: Border.all(
-                            color: AddaColors.coral.withAlpha(80),
-                          ),
-                        ),
-                        child: const Row(
-                          children: [
-                            Text('☕️ ', style: TextStyle(fontSize: 12)),
-                            Text(
-                              'ADDA',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                color: AddaColors.coral,
-                                fontSize: 11,
-                                letterSpacing: 1.2,
                               ),
                             ),
                           ],
@@ -313,7 +293,7 @@ class HomeScreen extends ConsumerWidget {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       TextButton(
-                        onPressed: () => context.go('/spaces'),
+                        onPressed: () => context.go('/hangout'),
                         child: const Text(
                           'View all',
                           style: TextStyle(

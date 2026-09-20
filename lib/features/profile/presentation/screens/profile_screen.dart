@@ -82,7 +82,12 @@ class ProfileScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(AddaSpacing.lg),
                 child: Row(
                   children: [
-                    AppAvatar(name: user.name, size: 60, isOnline: true),
+                    AppAvatar(
+                      name: user.name,
+                      avatarSeed: user.avatarSeed,
+                      size: 60,
+                      isOnline: true,
+                    ),
                     const SizedBox(width: AddaSpacing.lg),
                     Expanded(
                       child: Column(
@@ -184,9 +189,15 @@ class ProfileScreen extends ConsumerWidget {
                       value: ref.watch(themeModeProvider) == ThemeMode.dark,
                       activeTrackColor: AddaColors.coral,
                       onChanged: (val) {
-                        ref.read(themeModeProvider.notifier).state = val
-                            ? ThemeMode.dark
-                            : ThemeMode.light;
+                        final newMode = val ? ThemeMode.dark : ThemeMode.light;
+                        ref.read(themeModeProvider.notifier).state = newMode;
+                        ref
+                            .read(authProvider.notifier)
+                            .updatePreferences(
+                              user.preferences.copyWith(
+                                themeMode: val ? 'dark' : 'light',
+                              ),
+                            );
                         HapticsService.selectionClick();
                       },
                     ),
@@ -208,12 +219,15 @@ class ProfileScreen extends ConsumerWidget {
                         Icons.vibration_rounded,
                         color: AddaColors.emerald,
                       ),
-                      value: HapticsService.enabled,
+                      value: user.preferences.hapticsEnabled,
                       activeTrackColor: AddaColors.coral,
                       onChanged: (val) {
-                        HapticsService.enabled = val;
+                        ref
+                            .read(authProvider.notifier)
+                            .updatePreferences(
+                              user.preferences.copyWith(hapticsEnabled: val),
+                            );
                         if (val) HapticsService.lightTap();
-                        ref.read(authProvider.notifier).loadUser();
                       },
                     ),
                     const Divider(),
@@ -234,12 +248,15 @@ class ProfileScreen extends ConsumerWidget {
                         Icons.volume_up_rounded,
                         color: AddaColors.amber,
                       ),
-                      value: AudioService.sfxEnabled,
+                      value: user.preferences.soundEnabled,
                       activeTrackColor: AddaColors.coral,
                       onChanged: (val) {
-                        AudioService.sfxEnabled = val;
+                        ref
+                            .read(authProvider.notifier)
+                            .updatePreferences(
+                              user.preferences.copyWith(soundEnabled: val),
+                            );
                         if (val) AudioService.playUiTap();
-                        ref.read(authProvider.notifier).loadUser();
                       },
                     ),
                   ],

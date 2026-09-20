@@ -5,6 +5,7 @@ import '../tokens/colors.dart';
 class AppAvatar extends StatelessWidget {
   final String name;
   final String? avatarUrl;
+  final String? avatarSeed;
   final double size;
   final bool isSpeaking;
   final bool isOnline;
@@ -15,12 +16,45 @@ class AppAvatar extends StatelessWidget {
     super.key,
     required this.name,
     this.avatarUrl,
+    this.avatarSeed,
     this.size = 44,
     this.isSpeaking = false,
     this.isOnline = true,
     this.isBot = false,
     this.onTap,
   });
+
+  static const Map<String, String> seedEmojis = {
+    'seed_chai': '☕️',
+    'seed_tiger': '🐯',
+    'seed_phoenix': '🦅',
+    'seed_bluff': '🎭',
+    'seed_cosmic': '🚀',
+    'seed_neon': '⚡️',
+    'seed_wizard': '🧙',
+    'seed_joker': '🃏',
+  };
+
+  static String? getSeedEmoji(String? seed) {
+    if (seed == null || seed.isEmpty) return null;
+    if (seedEmojis.containsKey(seed)) return seedEmojis[seed];
+    const fallbackEmojis = [
+      '☕️',
+      '🐯',
+      '🦅',
+      '🎭',
+      '🚀',
+      '⚡️',
+      '🧙',
+      '🃏',
+      '🦁',
+      '🌟',
+      '🎮',
+      '🔥',
+    ];
+    final hash = seed.codeUnits.fold(0, (prev, elem) => prev + elem);
+    return fallbackEmojis[hash % fallbackEmojis.length];
+  }
 
   Color _generateBgColor(String text) {
     final hash = text.codeUnits.fold(0, (prev, elem) => prev + elem);
@@ -31,6 +65,8 @@ class AppAvatar extends StatelessWidget {
       AddaColors.cyan,
       Color(0xFF3B82F6),
       Color(0xFFEC4899),
+      AddaColors.emerald,
+      AddaColors.rose,
     ];
     return colors[hash % colors.length];
   }
@@ -47,7 +83,11 @@ class AppAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = _generateBgColor(name);
+    final seedKey = avatarSeed != null && avatarSeed!.isNotEmpty
+        ? avatarSeed!
+        : name;
+    final bg = _generateBgColor(seedKey);
+    final emoji = getSeedEmoji(avatarSeed);
 
     Widget avatar = AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -75,14 +115,16 @@ class AppAvatar extends StatelessWidget {
             : null,
       ),
       alignment: Alignment.center,
-      child: Text(
-        _getInitials(name),
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-          fontSize: size * 0.38,
-        ),
-      ),
+      child: emoji != null
+          ? Text(emoji, style: TextStyle(fontSize: size * 0.46))
+          : Text(
+              _getInitials(name),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: size * 0.38,
+              ),
+            ),
     );
 
     final showBot = isBot || name.contains('Bot') || name.contains('🤖');

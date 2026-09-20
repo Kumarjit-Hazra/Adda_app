@@ -33,13 +33,17 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserProfile>> {
   Future<void> updateProfile({
     String? name,
     String? avatarUrl,
+    String? avatarSeed,
     String? statusMessage,
+    UserPreferences? preferences,
   }) async {
     try {
       final updated = await _repository.updateProfile(
         name: name,
         avatarUrl: avatarUrl,
+        avatarSeed: avatarSeed,
         statusMessage: statusMessage,
+        preferences: preferences,
       );
       state = AsyncValue.data(updated);
     } catch (e, st) {
@@ -47,9 +51,20 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserProfile>> {
     }
   }
 
-  Future<void> regenerateGuest() async {
+  Future<void> updateAvatarSeed(String avatarSeed) async {
+    await updateProfile(avatarSeed: avatarSeed);
+  }
+
+  Future<void> updatePreferences(UserPreferences preferences) async {
+    await updateProfile(preferences: preferences);
+  }
+
+  Future<void> regenerateGuest({String? name, String? avatarSeed}) async {
     try {
-      final user = await _repository.createGuestUser();
+      final user = await _repository.createGuestUser(
+        name: name,
+        avatarSeed: avatarSeed,
+      );
       state = AsyncValue.data(user);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
