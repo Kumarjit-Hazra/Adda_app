@@ -42,6 +42,7 @@ dependencies:
   google_fonts: ^8.2.1
   intl: ^0.20.3
   permission_handler: ^13.0.2
+  share_plus: ^13.3.0
 
 dev_dependencies:
   flutter_test:

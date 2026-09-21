@@ -8,8 +8,10 @@ class InMemoryChatRepository implements ChatRepository {
   final Map<String, ChatConversation> _conversations = {};
   final Map<String, List<ChatMessage>> _messages = {};
 
-  final _conversationsController = StreamController<List<ChatConversation>>.broadcast();
-  final Map<String, StreamController<List<ChatMessage>>> _messagesControllers = {};
+  final _conversationsController =
+      StreamController<List<ChatConversation>>.broadcast();
+  final Map<String, StreamController<List<ChatMessage>>> _messagesControllers =
+      {};
 
   InMemoryChatRepository() {
     // Seed initial data for testing/preview
@@ -39,7 +41,10 @@ class InMemoryChatRepository implements ChatRepository {
   }
 
   void _emitConversations() {
-    _conversationsController.add(_conversations.values.toList()..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)));
+    _conversationsController.add(
+      _conversations.values.toList()
+        ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt)),
+    );
   }
 
   void _emitMessages(String conversationId) {
@@ -48,7 +53,8 @@ class InMemoryChatRepository implements ChatRepository {
 
   @override
   Future<List<ChatConversation>> getConversations() async {
-    return _conversations.values.toList()..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    return _conversations.values.toList()
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
   }
 
   @override
@@ -57,12 +63,17 @@ class InMemoryChatRepository implements ChatRepository {
   }
 
   @override
-  Future<ChatMessage> sendMessage(String conversationId, ChatMessage message) async {
-    await Future.delayed(const Duration(milliseconds: 500)); // simulate network delay
+  Future<ChatMessage> sendMessage(
+    String conversationId,
+    ChatMessage message,
+  ) async {
+    await Future.delayed(
+      const Duration(milliseconds: 500),
+    ); // simulate network delay
 
     final sentMessage = message.copyWith(status: MessageStatus.sent);
     final msgs = _messages[conversationId] ?? [];
-    
+
     // Replace the optimistic "sending" message if it exists, otherwise add it
     final index = msgs.indexWhere((m) => m.id == message.id);
     if (index >= 0) {
@@ -102,7 +113,8 @@ class InMemoryChatRepository implements ChatRepository {
   @override
   Stream<List<ChatMessage>> watchMessages(String conversationId) {
     if (!_messagesControllers.containsKey(conversationId)) {
-      _messagesControllers[conversationId] = StreamController<List<ChatMessage>>.broadcast();
+      _messagesControllers[conversationId] =
+          StreamController<List<ChatMessage>>.broadcast();
     }
     return _messagesControllers[conversationId]!.stream;
   }

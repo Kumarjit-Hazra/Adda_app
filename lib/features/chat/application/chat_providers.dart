@@ -16,11 +16,14 @@ final chatRepositoryProvider = Provider<ChatRepository>((ref) {
 final conversationsProvider = StreamProvider<List<ChatConversation>>((ref) {
   final repo = ref.watch(chatRepositoryProvider);
   // Fetch initial immediately
-  repo.getConversations(); 
+  repo.getConversations();
   return repo.watchConversations();
 });
 
-final messagesProvider = StreamProvider.family<List<ChatMessage>, String>((ref, conversationId) {
+final messagesProvider = StreamProvider.family<List<ChatMessage>, String>((
+  ref,
+  conversationId,
+) {
   final repo = ref.watch(chatRepositoryProvider);
   repo.getMessages(conversationId);
   return repo.watchMessages(conversationId);
@@ -60,7 +63,10 @@ class ChatService {
   }
 
   Future<void> retryMessage(String conversationId, ChatMessage message) async {
-    final retryMsg = message.copyWith(status: MessageStatus.sending, timestamp: DateTime.now());
+    final retryMsg = message.copyWith(
+      status: MessageStatus.sending,
+      timestamp: DateTime.now(),
+    );
     await repository.sendMessage(conversationId, retryMsg);
   }
 

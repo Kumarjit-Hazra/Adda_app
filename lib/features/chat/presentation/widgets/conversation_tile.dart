@@ -9,10 +9,7 @@ import 'package:go_router/go_router.dart';
 class ConversationTile extends StatelessWidget {
   final ChatConversation conversation;
 
-  const ConversationTile({
-    super.key,
-    required this.conversation,
-  });
+  const ConversationTile({super.key, required this.conversation});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +18,8 @@ class ConversationTile extends StatelessWidget {
     final hasInvite = conversation.gameInviteId != null;
 
     // Formatting timestamp - simplified for now
-    final timeStr = "${conversation.updatedAt.hour}:${conversation.updatedAt.minute.toString().padLeft(2, '0')}";
+    final timeStr =
+        "${conversation.updatedAt.hour}:${conversation.updatedAt.minute.toString().padLeft(2, '0')}";
 
     return SurfaceCard(
       padding: const EdgeInsets.all(12),
@@ -33,7 +31,8 @@ class ConversationTile extends StatelessWidget {
           AppAvatar(
             name: conversation.title,
             size: 46,
-            isOnline: false, // Could integrate presence later based on participants
+            isOnline:
+                false, // Could integrate presence later based on participants
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -93,12 +92,10 @@ class ConversationTile extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           color: unread > 0
-                              ? (isDark
-                                  ? Colors.white
-                                  : Colors.black)
+                              ? (isDark ? Colors.white : Colors.black)
                               : (isDark
-                                  ? AddaColors.textSecondaryDark
-                                  : AddaColors.textSecondaryLight),
+                                    ? AddaColors.textSecondaryDark
+                                    : AddaColors.textSecondaryLight),
                           fontWeight: unread > 0
                               ? FontWeight.w600
                               : FontWeight.normal,

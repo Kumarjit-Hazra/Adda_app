@@ -21,7 +21,7 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     if (message.isSystem) {
       return Center(
         child: Container(
@@ -37,7 +37,9 @@ class MessageBubble extends StatelessWidget {
             message.content,
             style: TextStyle(
               fontSize: 12,
-              color: isDark ? AddaColors.textMutedDark : AddaColors.textMutedLight,
+              color: isDark
+                  ? AddaColors.textMutedDark
+                  : AddaColors.textMutedLight,
             ),
             textAlign: TextAlign.center,
           ),
@@ -52,7 +54,9 @@ class MessageBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
@@ -65,7 +69,11 @@ class MessageBubble extends StatelessWidget {
           ],
           if (isMe && isFailed)
             IconButton(
-              icon: const Icon(Icons.refresh_rounded, color: AddaColors.coral, size: 20),
+              icon: const Icon(
+                Icons.refresh_rounded,
+                color: AddaColors.coral,
+                size: 20,
+              ),
               onPressed: onRetry,
               tooltip: 'Retry',
             ),
@@ -78,13 +86,13 @@ class MessageBubble extends StatelessWidget {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: isFailed 
+                  color: isFailed
                       ? AddaColors.coral.withValues(alpha: 0.2 * 255)
                       : isMe
-                          ? AddaColors.coral
-                          : (isDark
-                              ? AddaColors.surfaceVariantDark
-                              : AddaColors.surfaceVariantLight),
+                      ? AddaColors.coral
+                      : (isDark
+                            ? AddaColors.surfaceVariantDark
+                            : AddaColors.surfaceVariantLight),
                   border: isFailed ? Border.all(color: AddaColors.coral) : null,
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(AddaRadius.lg),
@@ -118,8 +126,8 @@ class MessageBubble extends StatelessWidget {
                         color: isMe && !isFailed
                             ? Colors.white
                             : (isDark
-                                ? AddaColors.textPrimaryDark
-                                : AddaColors.textPrimaryLight),
+                                  ? AddaColors.textPrimaryDark
+                                  : AddaColors.textPrimaryLight),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -133,19 +141,24 @@ class MessageBubble extends StatelessWidget {
                             color: isMe && !isFailed
                                 ? Colors.white70
                                 : (isDark
-                                    ? AddaColors.textMutedDark
-                                    : AddaColors.textMutedLight),
+                                      ? AddaColors.textMutedDark
+                                      : AddaColors.textMutedLight),
                           ),
                         ),
                         if (isMe) ...[
                           const SizedBox(width: 4),
                           Icon(
-                            isFailed ? Icons.error_outline :
-                            isSending ? Icons.access_time : Icons.check,
+                            isFailed
+                                ? Icons.error_outline
+                                : isSending
+                                ? Icons.access_time
+                                : Icons.check,
                             size: 10,
-                            color: isFailed ? AddaColors.coral : (isMe ? Colors.white70 : Colors.black54),
-                          )
-                        ]
+                            color: isFailed
+                                ? AddaColors.coral
+                                : (isMe ? Colors.white70 : Colors.black54),
+                          ),
+                        ],
                       ],
                     ),
                   ],

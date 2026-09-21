@@ -29,18 +29,39 @@ class MockPermissions implements PermissionService {
 
 class MockAuthRepository implements AuthRepository {
   @override
-  Future<UserProfile> createGuestUser({String? name, String? avatarSeed}) async {
-    return UserProfile(id: 'test_user', name: 'Test', createdAt: DateTime.now());
+  Future<UserProfile> createGuestUser({
+    String? name,
+    String? avatarSeed,
+  }) async {
+    return UserProfile(
+      id: 'test_user',
+      name: 'Test',
+      createdAt: DateTime.now(),
+    );
   }
 
   @override
   Future<UserProfile> getCurrentUser() async {
-    return UserProfile(id: 'test_user', name: 'Test', createdAt: DateTime.now());
+    return UserProfile(
+      id: 'test_user',
+      name: 'Test',
+      createdAt: DateTime.now(),
+    );
   }
 
   @override
-  Future<UserProfile> updateProfile({String? name, String? avatarUrl, String? avatarSeed, String? statusMessage, UserPreferences? preferences}) async {
-    return UserProfile(id: 'test_user', name: 'Test', createdAt: DateTime.now());
+  Future<UserProfile> updateProfile({
+    String? name,
+    String? avatarUrl,
+    String? avatarSeed,
+    String? statusMessage,
+    UserPreferences? preferences,
+  }) async {
+    return UserProfile(
+      id: 'test_user',
+      name: 'Test',
+      createdAt: DateTime.now(),
+    );
   }
 
   @override

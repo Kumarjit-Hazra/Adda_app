@@ -27,8 +27,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // 1. Initial tab is Home
-      expect(find.text('Create Space'), findsOneWidget);
-      expect(find.text('Join with Code'), findsOneWidget);
+      expect(find.textContaining('TODAY\'S ADDA'), findsOneWidget);
 
       // 2. Switch to Play tab
       await tester.tap(find.text('Play'));
@@ -57,7 +56,7 @@ void main() {
       await tester.tap(find.text('Home'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Create Space'), findsOneWidget);
+      expect(find.textContaining('TODAY\'S ADDA'), findsOneWidget);
     },
   );
 

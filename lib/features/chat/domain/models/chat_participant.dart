@@ -10,11 +10,7 @@ class ChatParticipant {
   });
 
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'avatarUrl': avatarUrl,
-    };
+    return {'id': id, 'name': name, 'avatarUrl': avatarUrl};
   }
 
   factory ChatParticipant.fromMap(Map<String, dynamic> map) {

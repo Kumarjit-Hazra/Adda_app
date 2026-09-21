@@ -50,15 +50,20 @@ class FakeAuthRepository implements AuthRepository {
 }
 
 class MockWebRtc extends DefaultWebRtcService {}
+
 class MockPermissions implements PermissionService {
   @override
-  Future<MediaPermissionState> checkMicrophonePermission() async => MediaPermissionState.granted;
+  Future<MediaPermissionState> checkMicrophonePermission() async =>
+      MediaPermissionState.granted;
   @override
-  Future<MediaPermissionState> requestMicrophonePermission() async => MediaPermissionState.granted;
+  Future<MediaPermissionState> requestMicrophonePermission() async =>
+      MediaPermissionState.granted;
   @override
-  Future<MediaPermissionState> checkCameraPermission() async => MediaPermissionState.granted;
+  Future<MediaPermissionState> checkCameraPermission() async =>
+      MediaPermissionState.granted;
   @override
-  Future<MediaPermissionState> requestCameraPermission() async => MediaPermissionState.granted;
+  Future<MediaPermissionState> requestCameraPermission() async =>
+      MediaPermissionState.granted;
 }
 
 void main() {

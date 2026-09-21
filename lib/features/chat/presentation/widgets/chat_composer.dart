@@ -7,11 +7,7 @@ class ChatComposer extends StatefulWidget {
   final ValueChanged<String> onSend;
   final bool isSending;
 
-  const ChatComposer({
-    super.key,
-    required this.onSend,
-    this.isSending = false,
-  });
+  const ChatComposer({super.key, required this.onSend, this.isSending = false});
 
   @override
   State<ChatComposer> createState() => _ChatComposerState();
@@ -92,7 +88,9 @@ class _ChatComposerState extends State<ChatComposer> {
               style: IconButton.styleFrom(
                 backgroundColor: AddaColors.coral,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: AddaColors.coral.withValues(alpha: 0.5 * 255),
+                disabledBackgroundColor: AddaColors.coral.withValues(
+                  alpha: 0.5 * 255,
+                ),
               ),
             ),
           ],

@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/design_system/tokens/colors.dart';
-import '../../../../shared/design_system/tokens/radius.dart';
 import '../../../../shared/design_system/tokens/spacing.dart';
-import '../../../../shared/design_system/widgets/app_button.dart';
 import '../../../../shared/design_system/widgets/app_scaffold.dart';
 
 import '../../../../shared/design_system/widgets/adda_top_bar.dart';
@@ -13,9 +11,11 @@ import '../../../../shared/design_system/widgets/surface_card.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../room/presentation/providers/room_provider.dart';
 import '../../../spaces/presentation/providers/space_provider.dart';
-import '../../../spaces/presentation/widgets/create_space_sheet.dart';
-import '../../../spaces/presentation/widgets/join_space_dialog.dart';
 import '../../../spaces/presentation/widgets/space_card.dart';
+
+import '../widgets/daily_adda_card.dart';
+import '../widgets/daily_challenges_card.dart';
+import '../widgets/quick_play_carousel.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -105,31 +105,25 @@ class HomeScreen extends ConsumerWidget {
                     horizontal: AddaSpacing.lg,
                     vertical: AddaSpacing.sm,
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Hey, ${user.name} 👋',
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(fontWeight: FontWeight.w800),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              user.statusMessage ??
-                                  'Ready to hang out and play games',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: isDark
-                                    ? AddaColors.textSecondaryDark
-                                    : AddaColors.textSecondaryLight,
-                              ),
-                            ),
-                          ],
+                      Text(
+                        _getGreeting(user.name),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.w800),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        user.statusMessage ??
+                            'Ready to hang out and play games',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark
+                              ? AddaColors.textSecondaryDark
+                              : AddaColors.textSecondaryLight,
                         ),
                       ),
                     ],
@@ -137,146 +131,41 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
 
-              // Action Hero Card (Create / Join Space)
-              SliverToBoxAdapter(
+              // Today's Adda (Daily Prompt)
+              const SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AddaSpacing.lg,
+                  padding: EdgeInsets.fromLTRB(
+                    AddaSpacing.lg,
+                    AddaSpacing.lg,
+                    AddaSpacing.lg,
+                    AddaSpacing.md,
                   ),
-                  child: SurfaceCard(
-                    padding: const EdgeInsets.all(AddaSpacing.xl),
-                    gradient: isDark
-                        ? const LinearGradient(
-                            colors: [Color(0xFF1F283C), Color(0xFF131826)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                        : const LinearGradient(
-                            colors: [Color(0xFFFFFFFF), Color(0xFFEFF3FA)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Your Private Hangout',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Talk over WebRTC voice and play 29, UNO, Bluff or solve mystery puzzles in one shared space.',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(height: AddaSpacing.lg),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppButton(
-                                text: 'Create Space',
-                                icon: const Icon(Icons.add_rounded, size: 18),
-                                onPressed: () async {
-                                  final space = await CreateSpaceSheet.show(
-                                    context,
-                                  );
-                                  if (space != null && context.mounted) {
-                                    context.push(
-                                      '/space/${space.id}/room',
-                                      extra: space.name,
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: AppButton.secondary(
-                                text: 'Join with Code',
-                                icon: const Icon(Icons.key_rounded, size: 16),
-                                onPressed: () async {
-                                  final space = await JoinSpaceDialog.show(
-                                    context,
-                                  );
-                                  if (space != null && context.mounted) {
-                                    context.push(
-                                      '/space/${space.id}/room',
-                                      extra: space.name,
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                  child: DailyAddaCard(),
+                ),
+              ),
+
+              // Daily Challenges
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    AddaSpacing.lg,
+                    0,
+                    AddaSpacing.lg,
+                    AddaSpacing.lg,
                   ),
+                  child: DailyChallengesCard(),
                 ),
               ),
 
               // Quick Play Carousel
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: AddaSpacing.lg,
-                    top: AddaSpacing.xl,
-                    bottom: AddaSpacing.sm,
-                  ),
-                  child: Text(
-                    'Quick Play 🚀',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
+                  padding: EdgeInsets.only(top: AddaSpacing.sm),
+                  child: QuickPlayCarousel(),
                 ),
               ),
 
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 140,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AddaSpacing.lg,
-                    ),
-                    children: [
-                      _buildQuickPlayCard(
-                        context,
-                        title: '29 Cards',
-                        subtitle: 'Trick Taking',
-                        icon: Icons.style_rounded,
-                        color: AddaColors.coral,
-                        onTap: () => _enterFirstSpace(context, ref),
-                      ),
-                      _buildQuickPlayCard(
-                        context,
-                        title: 'UNO Clash',
-                        subtitle: 'Color Match',
-                        icon: Icons.filter_none_rounded,
-                        color: AddaColors.amber,
-                        onTap: () => _enterFirstSpace(context, ref),
-                      ),
-                      _buildQuickPlayCard(
-                        context,
-                        title: 'Bluff Masters',
-                        subtitle: 'Social Deception',
-                        icon: Icons.psychology_alt_rounded,
-                        color: AddaColors.rose,
-                        onTap: () => _enterFirstSpace(context, ref),
-                      ),
-                      _buildQuickPlayCard(
-                        context,
-                        title: 'Brain Arena',
-                        subtitle: 'Speed & Logic',
-                        icon: Icons.bolt_rounded,
-                        color: AddaColors.violet,
-                        onTap: () => _enterFirstSpace(context, ref),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Spaces List
+              // Spaces List (Active & Friends)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.only(
@@ -290,7 +179,9 @@ class HomeScreen extends ConsumerWidget {
                     children: [
                       Text(
                         'Your Active Spaces',
-                        style: Theme.of(context).textTheme.titleLarge,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       TextButton(
                         onPressed: () => context.go('/hangout'),
@@ -326,8 +217,7 @@ class HomeScreen extends ConsumerWidget {
                       child: EmptyStateView(
                         icon: Icons.group_work_outlined,
                         title: 'No Spaces Yet',
-                        message:
-                            'Create a space or join with a code from a friend.',
+                        message: 'Go to Hangout to create or join a space.',
                       ),
                     );
                   }
@@ -363,63 +253,14 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  void _enterFirstSpace(BuildContext context, WidgetRef ref) {
-    final spaces = ref.read(spacesProvider).valueOrNull ?? [];
-    if (spaces.isNotEmpty) {
-      final space = spaces.first;
-      context.push('/space/${space.id}/room', extra: space.name);
+  String _getGreeting(String name) {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good morning, $name!';
+    } else if (hour < 17) {
+      return 'Good afternoon, $name!';
     } else {
-      CreateSpaceSheet.show(context);
+      return 'Good evening, $name!';
     }
-  }
-
-  Widget _buildQuickPlayCard(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      width: 140,
-      margin: const EdgeInsets.only(right: 12),
-      child: SurfaceCard(
-        onTap: onTap,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        borderColor: color.withAlpha(60),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: color.withAlpha(30),
-                borderRadius: AddaRadius.radiusSm,
-              ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: const TextStyle(fontSize: 11, color: Colors.white54),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

@@ -40,7 +40,6 @@ void main() {
     );
 
     // Verify main action buttons on Home screen
-    expect(find.text('Create Space'), findsOneWidget);
-    expect(find.text('Join with Code'), findsOneWidget);
+    expect(find.textContaining('TODAY\'S ADDA'), findsOneWidget);
   });
 }
