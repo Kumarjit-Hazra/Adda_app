@@ -34,6 +34,10 @@ class SpaceRepositoryImpl implements SpaceRepository {
         isFavorite: true,
         lastActiveAt: now,
         createdAt: now.subtract(const Duration(days: 3)),
+        isLive: true,
+        activeParticipantCount: 3,
+        currentActivityName: 'Twenty-Nine',
+        lastActivityAt: now.subtract(const Duration(minutes: 5)),
       ),
       SpaceModel(
         id: 'spc_game_night',
@@ -46,6 +50,10 @@ class SpaceRepositoryImpl implements SpaceRepository {
         isFavorite: true,
         lastActiveAt: now.subtract(const Duration(hours: 2)),
         createdAt: now.subtract(const Duration(days: 7)),
+        isLive: true,
+        activeParticipantCount: 5,
+        currentActivityName: 'UNO Clash',
+        lastActivityAt: now.subtract(const Duration(minutes: 12)),
       ),
       SpaceModel(
         id: 'spc_brain_iacs',
@@ -58,6 +66,9 @@ class SpaceRepositoryImpl implements SpaceRepository {
         isFavorite: false,
         lastActiveAt: now.subtract(const Duration(days: 1)),
         createdAt: now.subtract(const Duration(days: 5)),
+        isLive: false,
+        activeParticipantCount: 0,
+        lastActivityAt: now.subtract(const Duration(hours: 6)),
       ),
     ];
   }

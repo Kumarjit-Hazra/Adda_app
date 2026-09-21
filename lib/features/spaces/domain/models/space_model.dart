@@ -42,6 +42,12 @@ class SpaceModel {
   final DateTime lastActiveAt;
   final DateTime createdAt;
 
+  // Phase 6: Presence & activity metadata
+  final int activeParticipantCount;
+  final String? currentActivityName;
+  final bool isLive;
+  final DateTime? lastActivityAt;
+
   const SpaceModel({
     required this.id,
     required this.name,
@@ -53,6 +59,10 @@ class SpaceModel {
     this.isFavorite = false,
     required this.lastActiveAt,
     required this.createdAt,
+    this.activeParticipantCount = 0,
+    this.currentActivityName,
+    this.isLive = false,
+    this.lastActivityAt,
   });
 
   SpaceModel copyWith({
@@ -66,6 +76,12 @@ class SpaceModel {
     bool? isFavorite,
     DateTime? lastActiveAt,
     DateTime? createdAt,
+    int? activeParticipantCount,
+    String? currentActivityName,
+    bool clearCurrentActivity = false,
+    bool? isLive,
+    DateTime? lastActivityAt,
+    bool clearLastActivity = false,
   }) {
     return SpaceModel(
       id: id ?? this.id,
@@ -78,6 +94,15 @@ class SpaceModel {
       isFavorite: isFavorite ?? this.isFavorite,
       lastActiveAt: lastActiveAt ?? this.lastActiveAt,
       createdAt: createdAt ?? this.createdAt,
+      activeParticipantCount:
+          activeParticipantCount ?? this.activeParticipantCount,
+      currentActivityName: clearCurrentActivity
+          ? null
+          : (currentActivityName ?? this.currentActivityName),
+      isLive: isLive ?? this.isLive,
+      lastActivityAt: clearLastActivity
+          ? null
+          : (lastActivityAt ?? this.lastActivityAt),
     );
   }
 
@@ -93,6 +118,10 @@ class SpaceModel {
       'isFavorite': isFavorite,
       'lastActiveAt': lastActiveAt.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
+      'activeParticipantCount': activeParticipantCount,
+      'currentActivityName': currentActivityName,
+      'isLive': isLive,
+      'lastActivityAt': lastActivityAt?.toIso8601String(),
     };
   }
 
@@ -115,6 +144,13 @@ class SpaceModel {
       createdAt:
           DateTime.tryParse(map['createdAt'] as String? ?? '') ??
           DateTime.now(),
+      activeParticipantCount:
+          map['activeParticipantCount'] as int? ?? 0,
+      currentActivityName: map['currentActivityName'] as String?,
+      isLive: map['isLive'] as bool? ?? false,
+      lastActivityAt: map['lastActivityAt'] != null
+          ? DateTime.tryParse(map['lastActivityAt'] as String)
+          : null,
     );
   }
 

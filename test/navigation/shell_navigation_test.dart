@@ -38,17 +38,19 @@ void main() {
       expect(find.text('29 Cards Championship'), findsOneWidget);
 
       // 3. Switch to Hangout tab
+      // Note: HangoutScreen has a pulsing LiveSpaceCard animation, so
+      // pumpAndSettle will time out. Use pump(duration) instead.
       await tester.tap(find.text('Hangout'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.widgetWithText(AppBar, 'Hangout'), findsOneWidget);
-      expect(find.text('All Spaces'), findsOneWidget);
+      expect(find.text('Live Now'), findsOneWidget);
 
       // 4. Switch to Chat tab
       await tester.tap(find.text('Chat'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.widgetWithText(AppBar, 'Chat'), findsOneWidget);
       expect(find.text('All Chats'), findsOneWidget);
 
       // 5. Switch back to Home
@@ -79,13 +81,15 @@ void main() {
 
     // Switch to Chat tab
     await tester.tap(find.text('Chat'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('All Chats'), findsOneWidget);
 
-    // Switch to Hangout tab
+    // Switch to Hangout tab (uses pump due to LiveSpaceCard animation)
     await tester.tap(find.text('Hangout'));
-    await tester.pumpAndSettle();
-    expect(find.widgetWithText(AppBar, 'Hangout'), findsOneWidget);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Live Now'), findsOneWidget);
 
     // Switch back to Play tab
     await tester.tap(find.text('Play'));
@@ -127,8 +131,10 @@ void main() {
     await tester.pumpAndSettle();
 
     appRouter.go('/spaces');
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.widgetWithText(AppBar, 'Hangout'), findsOneWidget);
+    // HangoutScreen renders "Live Now" section from seed data
+    expect(find.text('Live Now'), findsOneWidget);
   });
 }

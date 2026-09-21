@@ -114,8 +114,9 @@ class GameSessionNotifier extends StateNotifier<GameSession?> {
 
     final currentSession = state;
     if (currentSession == null ||
-        currentSession.status != GameSessionStatus.playing)
+        currentSession.status != GameSessionStatus.playing) {
       return;
+    }
 
     // Check if current player is a bot
     // We assume the engine exposes playerIds and currentTurnIndex.
@@ -132,8 +133,9 @@ class GameSessionNotifier extends StateNotifier<GameSession?> {
   void _executeBotTurn() {
     final currentSession = state;
     if (currentSession == null ||
-        currentSession.status != GameSessionStatus.playing)
+        currentSession.status != GameSessionStatus.playing) {
       return;
+    }
 
     // Find any bot that can take an action
     for (final player in currentSession.players) {

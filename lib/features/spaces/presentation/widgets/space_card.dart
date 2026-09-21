@@ -4,6 +4,7 @@ import '../../../../shared/design_system/tokens/colors.dart';
 import '../../../../shared/design_system/tokens/radius.dart';
 import '../../../../shared/design_system/tokens/spacing.dart';
 import '../../../../shared/design_system/widgets/surface_card.dart';
+import '../../../hangout/presentation/widgets/activity_badge.dart';
 import '../../domain/models/space_model.dart';
 
 class SpaceCard extends StatelessWidget {
@@ -51,23 +52,67 @@ class SpaceCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      space.name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            space.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        // Live indicator dot
+                        if (space.isLive) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: AddaColors.emerald,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      space.type.displayName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: space.type.color,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          space.type.displayName,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: space.type.color,
+                          ),
+                        ),
+                        // Active participant count
+                        if (space.activeParticipantCount > 0) ...[
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.people_alt_rounded,
+                            size: 12,
+                            color: isDark
+                                ? AddaColors.textMutedDark
+                                : AddaColors.textMutedLight,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            '${space.activeParticipantCount}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: isDark
+                                  ? AddaColors.textSecondaryDark
+                                  : AddaColors.textSecondaryLight,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
@@ -103,6 +148,13 @@ class SpaceCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ],
+
+          // Current activity badge
+          if (space.currentActivityName != null) ...[
+            const SizedBox(height: AddaSpacing.sm),
+            ActivityBadge(activityName: space.currentActivityName!),
+          ],
+
           const SizedBox(height: AddaSpacing.md),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -171,3 +223,4 @@ class SpaceCard extends StatelessWidget {
     );
   }
 }
+

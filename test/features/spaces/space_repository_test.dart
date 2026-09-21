@@ -44,5 +44,50 @@ void main() {
       final toggled = await repo.toggleFavorite(target.id);
       expect(toggled.isFavorite, !initialFav);
     });
+
+    test('default spaces include Phase 6 presence fields', () async {
+      final spaces = await repo.getSpaces();
+      // At least one space should be live with participants
+      final liveSpaces = spaces.where((s) => s.isLive).toList();
+      expect(liveSpaces.isNotEmpty, isTrue);
+      expect(
+        liveSpaces.any((s) => s.activeParticipantCount > 0),
+        isTrue,
+      );
+      expect(
+        liveSpaces.any((s) => s.currentActivityName != null),
+        isTrue,
+      );
+    });
+
+    test('serialization round-trip preserves presence fields', () async {
+      final original = SpaceModel(
+        id: 'spc_test_serial',
+        name: 'Serial Test',
+        description: 'Testing serialization',
+        type: SpaceType.gameNight,
+        inviteCode: 'TSTS01',
+        ownerId: 'usr_test',
+        memberIds: ['usr_test'],
+        isFavorite: true,
+        lastActiveAt: DateTime(2026, 9, 20),
+        createdAt: DateTime(2026, 9, 1),
+        isLive: true,
+        activeParticipantCount: 7,
+        currentActivityName: 'Brain Arena',
+        lastActivityAt: DateTime(2026, 9, 20, 14, 30),
+      );
+
+      final json = original.toJson();
+      final restored = SpaceModel.fromJson(json);
+
+      expect(restored.isLive, original.isLive);
+      expect(
+        restored.activeParticipantCount,
+        original.activeParticipantCount,
+      );
+      expect(restored.currentActivityName, original.currentActivityName);
+      expect(restored.lastActivityAt, original.lastActivityAt);
+    });
   });
 }
