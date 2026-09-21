@@ -4,7 +4,7 @@ import '../../../../shared/design_system/tokens/colors.dart';
 import '../../../../shared/design_system/tokens/radius.dart';
 import '../../../../shared/design_system/tokens/spacing.dart';
 import '../../../../shared/design_system/widgets/app_avatar.dart';
-import '../../domain/models/chat_message.dart';
+import '../../../chat/domain/models/chat_message.dart';
 
 class RoomChatDrawer extends StatefulWidget {
   final List<ChatMessage> messages;

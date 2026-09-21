@@ -14,6 +14,7 @@ class AddaTopBar extends ConsumerWidget implements PreferredSizeWidget {
   final String? contextTitle;
   final String? contextBadge;
   final Color? badgeColor;
+  final Widget? leading;
   final List<Widget>? actions;
   final bool showIdentityPill;
   final VoidCallback? onIdentityTap;
@@ -24,6 +25,7 @@ class AddaTopBar extends ConsumerWidget implements PreferredSizeWidget {
     this.contextTitle,
     this.contextBadge,
     this.badgeColor,
+    this.leading,
     this.actions,
     this.showIdentityPill = true,
     this.onIdentityTap,
@@ -49,7 +51,9 @@ class AddaTopBar extends ConsumerWidget implements PreferredSizeWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     Widget? leadingContent;
-    if (showIdentityPill) {
+    if (leading != null) {
+      leadingContent = leading;
+    } else if (showIdentityPill) {
       leadingContent = userAsync.maybeWhen(
         data: (user) => GestureDetector(
           onTap: () => _handleIdentityTap(context),

@@ -8,6 +8,7 @@ import '../features/home/presentation/screens/home_screen.dart';
 import '../features/play/presentation/screens/play_screen.dart';
 import '../features/profile/presentation/screens/profile_screen.dart';
 import '../features/room/presentation/screens/room_screen.dart';
+import '../features/chat/presentation/screens/conversation_screen.dart';
 import '../shared/design_system/tokens/colors.dart';
 import '../shared/design_system/tokens/radius.dart';
 
@@ -101,6 +102,16 @@ final appRouter = GoRouter(
         final spaceId = state.pathParameters['id'] ?? 'space_main';
         final spaceName = (state.extra as String?) ?? 'Adda Space';
         return RoomScreen(spaceId: spaceId, spaceName: spaceName);
+      },
+    ),
+
+    // Conversation Route
+    GoRoute(
+      parentNavigatorKey: _rootNavigatorKey,
+      path: '/chat/:id',
+      builder: (context, state) {
+        final conversationId = state.pathParameters['id'] ?? '';
+        return ConversationScreen(conversationId: conversationId);
       },
     ),
 

@@ -1,5 +1,5 @@
 import 'participant.dart';
-import 'chat_message.dart';
+import '../../../chat/domain/models/chat_message.dart';
 
 class RoomSession {
   final String roomId;

@@ -1,3 +1,5 @@
+import '../enums/message_status.dart';
+
 class ChatMessage {
   final String id;
   final String senderId;
@@ -5,6 +7,7 @@ class ChatMessage {
   final String content;
   final DateTime timestamp;
   final bool isSystem;
+  final MessageStatus status;
 
   const ChatMessage({
     required this.id,
@@ -13,7 +16,28 @@ class ChatMessage {
     required this.content,
     required this.timestamp,
     this.isSystem = false,
+    this.status = MessageStatus.sent,
   });
+
+  ChatMessage copyWith({
+    String? id,
+    String? senderId,
+    String? senderName,
+    String? content,
+    DateTime? timestamp,
+    bool? isSystem,
+    MessageStatus? status,
+  }) {
+    return ChatMessage(
+      id: id ?? this.id,
+      senderId: senderId ?? this.senderId,
+      senderName: senderName ?? this.senderName,
+      content: content ?? this.content,
+      timestamp: timestamp ?? this.timestamp,
+      isSystem: isSystem ?? this.isSystem,
+      status: status ?? this.status,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -23,6 +47,7 @@ class ChatMessage {
       'content': content,
       'timestamp': timestamp.toIso8601String(),
       'isSystem': isSystem,
+      'status': status.name,
     };
   }
 
@@ -36,6 +61,10 @@ class ChatMessage {
           DateTime.tryParse(map['timestamp'] as String? ?? '') ??
           DateTime.now(),
       isSystem: map['isSystem'] as bool? ?? false,
+      status: MessageStatus.values.firstWhere(
+        (e) => e.name == map['status'],
+        orElse: () => MessageStatus.sent,
+      ),
     );
   }
 }

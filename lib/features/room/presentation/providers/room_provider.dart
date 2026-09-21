@@ -8,7 +8,7 @@ import '../../../../core/realtime/signaling_service.dart';
 import '../../../../core/webrtc/webrtc_service.dart';
 import '../../../../core/permissions/permission_service.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../domain/models/chat_message.dart';
+import '../../../chat/domain/models/chat_message.dart';
 import '../../domain/models/participant.dart';
 import '../../domain/models/reaction.dart';
 import '../../domain/models/room_session.dart';
