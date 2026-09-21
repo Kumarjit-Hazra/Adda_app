@@ -7,6 +7,7 @@ import '../../../../shared/design_system/widgets/app_button.dart';
 class RoomControlsBar extends StatelessWidget {
   final bool isMuted;
   final bool isVideoEnabled;
+  final String? mediaErrorState;
   final int unreadChatCount;
   final VoidCallback onToggleMic;
   final VoidCallback onToggleCamera;
@@ -19,6 +20,7 @@ class RoomControlsBar extends StatelessWidget {
     super.key,
     required this.isMuted,
     required this.isVideoEnabled,
+    this.mediaErrorState,
     this.unreadChatCount = 0,
     required this.onToggleMic,
     required this.onToggleCamera,
@@ -60,17 +62,25 @@ class RoomControlsBar extends StatelessWidget {
           // Mic Toggle
           AppIconButton(
             icon: Icon(
-              isMuted ? Icons.mic_off_rounded : Icons.mic_rounded,
-              color: isMuted ? Colors.white : AddaColors.emerald,
+              mediaErrorState != null
+                  ? Icons.mic_off_rounded
+                  : (isMuted ? Icons.mic_off_rounded : Icons.mic_rounded),
+              color: mediaErrorState != null
+                  ? AddaColors.rose
+                  : (isMuted ? Colors.white : AddaColors.emerald),
               size: 20,
             ),
-            backgroundColor: isMuted
-                ? AddaColors.rose
-                : (isDark
-                      ? AddaColors.surfaceVariantDark
-                      : AddaColors.surfaceVariantLight),
+            backgroundColor: mediaErrorState != null
+                ? AddaColors.rose.withAlpha(25)
+                : (isMuted
+                      ? AddaColors.rose
+                      : (isDark
+                            ? AddaColors.surfaceVariantDark
+                            : AddaColors.surfaceVariantLight)),
             onPressed: onToggleMic,
-            tooltip: isMuted ? 'Unmute Mic' : 'Mute Mic',
+            tooltip: mediaErrorState != null
+                ? mediaErrorState!
+                : (isMuted ? 'Unmute Mic' : 'Mute Mic'),
           ),
           const SizedBox(width: 8),
 

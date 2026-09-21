@@ -144,8 +144,7 @@ class SpaceModel {
       createdAt:
           DateTime.tryParse(map['createdAt'] as String? ?? '') ??
           DateTime.now(),
-      activeParticipantCount:
-          map['activeParticipantCount'] as int? ?? 0,
+      activeParticipantCount: map['activeParticipantCount'] as int? ?? 0,
       currentActivityName: map['currentActivityName'] as String?,
       isLive: map['isLive'] as bool? ?? false,
       lastActivityAt: map['lastActivityAt'] != null

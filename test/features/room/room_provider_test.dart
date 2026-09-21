@@ -4,6 +4,8 @@ import 'package:adda/features/auth/domain/models/user_profile.dart';
 import 'package:adda/features/auth/domain/repositories/auth_repository.dart';
 import 'package:adda/features/auth/presentation/providers/auth_provider.dart';
 import 'package:adda/features/room/presentation/providers/room_provider.dart';
+import 'package:adda/core/webrtc/webrtc_service.dart';
+import 'package:adda/core/permissions/permission_service.dart';
 
 class FakeAuthRepository implements AuthRepository {
   @override
@@ -47,6 +49,18 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> logout() async {}
 }
 
+class MockWebRtc extends DefaultWebRtcService {}
+class MockPermissions implements PermissionService {
+  @override
+  Future<MediaPermissionState> checkMicrophonePermission() async => MediaPermissionState.granted;
+  @override
+  Future<MediaPermissionState> requestMicrophonePermission() async => MediaPermissionState.granted;
+  @override
+  Future<MediaPermissionState> checkCameraPermission() async => MediaPermissionState.granted;
+  @override
+  Future<MediaPermissionState> requestCameraPermission() async => MediaPermissionState.granted;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -58,6 +72,8 @@ void main() {
       container = ProviderContainer(
         overrides: [
           authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+          webrtcServiceProvider.overrideWithValue(MockWebRtc()),
+          permissionServiceProvider.overrideWithValue(MockPermissions()),
         ],
       );
       await container.read(authProvider.notifier).loadUser();

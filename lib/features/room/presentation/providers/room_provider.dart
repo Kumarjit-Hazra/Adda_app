@@ -6,6 +6,7 @@ import '../../../../core/haptics/haptics_service.dart';
 import '../../../../core/realtime/realtime_event.dart';
 import '../../../../core/realtime/signaling_service.dart';
 import '../../../../core/webrtc/webrtc_service.dart';
+import '../../../../core/permissions/permission_service.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/models/chat_message.dart';
 import '../../domain/models/participant.dart';
@@ -20,18 +21,34 @@ final webrtcServiceProvider = Provider<WebRtcService>((ref) {
   return DefaultWebRtcService();
 });
 
+final permissionServiceProvider = Provider<PermissionService>((ref) {
+  return DefaultPermissionService();
+});
+
 class RoomNotifier extends StateNotifier<RoomSession?> {
   final SignalingService _signaling;
   final WebRtcService _webrtc;
+  final PermissionService _permissions;
   final Ref _ref;
   StreamSubscription? _signalingSub;
   StreamSubscription? _audioLevelSub;
+  StreamSubscription? _webrtcStateSub;
   int _sequence = 0;
 
   final List<RoomReaction> _recentReactions = [];
   List<RoomReaction> get recentReactions => List.unmodifiable(_recentReactions);
 
-  RoomNotifier(this._signaling, this._webrtc, this._ref) : super(null);
+  RoomNotifier(this._signaling, this._webrtc, this._permissions, this._ref)
+    : super(null) {
+    _webrtcStateSub = _webrtc.stateStream.listen((rtcState) {
+      if (state == null) return;
+      if (rtcState == WebRtcState.failed) {
+        state = state!.copyWith(mediaErrorState: 'WebRTC Connection Failed');
+      } else if (rtcState == WebRtcState.disconnected) {
+        // Handled cleanly.
+      }
+    });
+  }
 
   Future<void> joinRoom({
     required String spaceId,
@@ -52,7 +69,7 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
       name: user.name,
       avatarUrl: user.avatarUrl,
       isSpeaking: false,
-      isMuted: false,
+      isMuted: true, // Default to true until mic is enabled
       isVideoEnabled: false,
       isHost: true,
     );
@@ -126,7 +143,9 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
         ),
       ],
       isConnected: true,
-      isVoiceJoined: autoJoinVoice,
+      isVoiceJoined: false, // Wait for joinVoiceChat to update this
+      isMicEnabled: false,
+      isCameraEnabled: false,
       isSoloMode: isSoloMode,
     );
 
@@ -136,7 +155,7 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
       _signalingSub = _signaling.eventStream.listen(_handleSignalingEvent);
     }
 
-    if (autoJoinVoice) {
+    if (autoJoinVoice && !isSoloMode) {
       await joinVoiceChat();
     }
   }
@@ -154,12 +173,30 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
 
   Future<void> joinVoiceChat() async {
     if (state == null || state!.isVoiceJoined) return;
+
     try {
-      await _webrtc.initializeMedia();
+      await _webrtc.initializeMedia(_permissions);
       _setupAudioLevelListener();
-      state = state!.copyWith(isVoiceJoined: true);
+
+      final user = _ref.read(authProvider).valueOrNull;
+
+      state = state!.copyWith(
+        isVoiceJoined: true,
+        isMicEnabled: !_webrtc.isMicMuted,
+        mediaErrorState: _webrtc.isMicMuted
+            ? 'Microphone Permission Denied'
+            : null,
+        clearMediaErrorState: !_webrtc.isMicMuted,
+      );
+
+      if (user != null) {
+        _updateParticipantMedia(user.id, isMuted: _webrtc.isMicMuted);
+      }
+
       HapticsService.success();
-    } catch (_) {}
+    } catch (e) {
+      state = state!.copyWith(mediaErrorState: 'Failed to join voice: $e');
+    }
   }
 
   Future<void> leaveVoiceChat() async {
@@ -169,8 +206,14 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
     final user = _ref.read(authProvider).valueOrNull;
     if (user != null) {
       _updateParticipantSpeaking(user.id, false);
+      _updateParticipantMedia(user.id, isMuted: true, isVideoEnabled: false);
     }
-    state = state!.copyWith(isVoiceJoined: false);
+    state = state!.copyWith(
+      isVoiceJoined: false,
+      isMicEnabled: false,
+      isCameraEnabled: false,
+      clearMediaErrorState: true,
+    );
     HapticsService.lightTap();
   }
 
@@ -214,6 +257,24 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
     final updated = state!.participants.map((p) {
       if (p.id == participantId) {
         return p.copyWith(isSpeaking: isSpeaking);
+      }
+      return p;
+    }).toList();
+    state = state!.copyWith(participants: updated);
+  }
+
+  void _updateParticipantMedia(
+    String participantId, {
+    bool? isMuted,
+    bool? isVideoEnabled,
+  }) {
+    if (state == null) return;
+    final updated = state!.participants.map((p) {
+      if (p.id == participantId) {
+        return p.copyWith(
+          isMuted: isMuted ?? p.isMuted,
+          isVideoEnabled: isVideoEnabled ?? p.isVideoEnabled,
+        );
       }
       return p;
     }).toList();
@@ -268,32 +329,36 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
     final user = _ref.read(authProvider).valueOrNull;
     if (user == null || state == null) return;
 
-    await _webrtc.toggleMic();
-    HapticsService.selectionClick();
+    try {
+      await _webrtc.toggleMic(_permissions);
+      HapticsService.selectionClick();
 
-    final updated = state!.participants.map((p) {
-      if (p.id == user.id) {
-        return p.copyWith(isMuted: _webrtc.isMicMuted);
-      }
-      return p;
-    }).toList();
-    state = state!.copyWith(participants: updated);
+      state = state!.copyWith(
+        isMicEnabled: !_webrtc.isMicMuted,
+        clearMediaErrorState: true,
+      );
+      _updateParticipantMedia(user.id, isMuted: _webrtc.isMicMuted);
+    } catch (e) {
+      state = state!.copyWith(mediaErrorState: 'Microphone permission denied');
+    }
   }
 
   Future<void> toggleCamera() async {
     final user = _ref.read(authProvider).valueOrNull;
     if (user == null || state == null) return;
 
-    await _webrtc.toggleCamera();
-    HapticsService.selectionClick();
+    try {
+      await _webrtc.toggleCamera(_permissions);
+      HapticsService.selectionClick();
 
-    final updated = state!.participants.map((p) {
-      if (p.id == user.id) {
-        return p.copyWith(isVideoEnabled: _webrtc.isCameraEnabled);
-      }
-      return p;
-    }).toList();
-    state = state!.copyWith(participants: updated);
+      state = state!.copyWith(
+        isCameraEnabled: _webrtc.isCameraEnabled,
+        clearMediaErrorState: true,
+      );
+      _updateParticipantMedia(user.id, isVideoEnabled: _webrtc.isCameraEnabled);
+    } catch (e) {
+      state = state!.copyWith(mediaErrorState: 'Camera permission denied');
+    }
   }
 
   void setActiveActivity(String? activityId) {
@@ -319,6 +384,7 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
   void dispose() {
     _signalingSub?.cancel();
     _audioLevelSub?.cancel();
+    _webrtcStateSub?.cancel();
     super.dispose();
   }
 }
@@ -326,5 +392,6 @@ class RoomNotifier extends StateNotifier<RoomSession?> {
 final roomProvider = StateNotifierProvider<RoomNotifier, RoomSession?>((ref) {
   final signaling = ref.watch(signalingServiceProvider);
   final webrtc = ref.watch(webrtcServiceProvider);
-  return RoomNotifier(signaling, webrtc, ref);
+  final permissions = ref.watch(permissionServiceProvider);
+  return RoomNotifier(signaling, webrtc, permissions, ref);
 });

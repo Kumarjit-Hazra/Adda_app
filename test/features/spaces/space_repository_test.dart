@@ -50,14 +50,8 @@ void main() {
       // At least one space should be live with participants
       final liveSpaces = spaces.where((s) => s.isLive).toList();
       expect(liveSpaces.isNotEmpty, isTrue);
-      expect(
-        liveSpaces.any((s) => s.activeParticipantCount > 0),
-        isTrue,
-      );
-      expect(
-        liveSpaces.any((s) => s.currentActivityName != null),
-        isTrue,
-      );
+      expect(liveSpaces.any((s) => s.activeParticipantCount > 0), isTrue);
+      expect(liveSpaces.any((s) => s.currentActivityName != null), isTrue);
     });
 
     test('serialization round-trip preserves presence fields', () async {
@@ -82,10 +76,7 @@ void main() {
       final restored = SpaceModel.fromJson(json);
 
       expect(restored.isLive, original.isLive);
-      expect(
-        restored.activeParticipantCount,
-        original.activeParticipantCount,
-      );
+      expect(restored.activeParticipantCount, original.activeParticipantCount);
       expect(restored.currentActivityName, original.currentActivityName);
       expect(restored.lastActivityAt, original.lastActivityAt);
     });

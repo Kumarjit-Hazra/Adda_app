@@ -5,6 +5,7 @@ class Participant {
   final bool isSpeaking;
   final bool isMuted;
   final bool isVideoEnabled;
+  final bool isMediaUnavailable;
   final bool isHost;
   final int pingMs;
 
@@ -15,6 +16,7 @@ class Participant {
     this.isSpeaking = false,
     this.isMuted = false,
     this.isVideoEnabled = false,
+    this.isMediaUnavailable = false,
     this.isHost = false,
     this.pingMs = 28,
   });
@@ -26,6 +28,7 @@ class Participant {
     bool? isSpeaking,
     bool? isMuted,
     bool? isVideoEnabled,
+    bool? isMediaUnavailable,
     bool? isHost,
     int? pingMs,
   }) {
@@ -36,6 +39,7 @@ class Participant {
       isSpeaking: isSpeaking ?? this.isSpeaking,
       isMuted: isMuted ?? this.isMuted,
       isVideoEnabled: isVideoEnabled ?? this.isVideoEnabled,
+      isMediaUnavailable: isMediaUnavailable ?? this.isMediaUnavailable,
       isHost: isHost ?? this.isHost,
       pingMs: pingMs ?? this.pingMs,
     );
@@ -49,6 +53,7 @@ class Participant {
       'isSpeaking': isSpeaking,
       'isMuted': isMuted,
       'isVideoEnabled': isVideoEnabled,
+      'isMediaUnavailable': isMediaUnavailable,
       'isHost': isHost,
       'pingMs': pingMs,
     };
@@ -62,6 +67,7 @@ class Participant {
       isSpeaking: map['isSpeaking'] as bool? ?? false,
       isMuted: map['isMuted'] as bool? ?? false,
       isVideoEnabled: map['isVideoEnabled'] as bool? ?? false,
+      isMediaUnavailable: map['isMediaUnavailable'] as bool? ?? false,
       isHost: map['isHost'] as bool? ?? false,
       pingMs: map['pingMs'] as int? ?? 28,
     );

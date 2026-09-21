@@ -29,10 +29,9 @@ final mySpacesProvider = Provider<List<SpaceModel>>((ref) {
 
   return spacesAsync.when(
     data: (spaces) {
-      final mine = spaces
-          .where((s) => s.isFavorite || s.ownerId == userId)
-          .toList()
-        ..sort((a, b) => b.lastActiveAt.compareTo(a.lastActiveAt));
+      final mine =
+          spaces.where((s) => s.isFavorite || s.ownerId == userId).toList()
+            ..sort((a, b) => b.lastActiveAt.compareTo(a.lastActiveAt));
       return mine;
     },
     loading: () => [],
@@ -46,14 +45,13 @@ final recentlyActiveProvider = Provider<List<SpaceModel>>((ref) {
   final spacesAsync = ref.watch(spacesProvider);
   return spacesAsync.when(
     data: (spaces) {
-      final recent = spaces
-          .where((s) => !s.isLive && s.lastActivityAt != null)
-          .toList()
-        ..sort((a, b) {
-          final aTime = a.lastActivityAt ?? DateTime(2000);
-          final bTime = b.lastActivityAt ?? DateTime(2000);
-          return bTime.compareTo(aTime);
-        });
+      final recent =
+          spaces.where((s) => !s.isLive && s.lastActivityAt != null).toList()
+            ..sort((a, b) {
+              final aTime = a.lastActivityAt ?? DateTime(2000);
+              final bTime = b.lastActivityAt ?? DateTime(2000);
+              return bTime.compareTo(aTime);
+            });
       return recent.take(5).toList();
     },
     loading: () => [],

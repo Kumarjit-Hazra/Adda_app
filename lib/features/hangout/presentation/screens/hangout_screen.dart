@@ -64,8 +64,7 @@ class _HangoutScreenState extends ConsumerState<HangoutScreen> {
         ],
       ),
       body: spacesAsync.when(
-        loading: () =>
-            const LoadingStateView(message: 'Loading Spaces...'),
+        loading: () => const LoadingStateView(message: 'Loading Spaces...'),
         error: (err, _) => ErrorStateView(
           message: err.toString(),
           onRetry: () => ref.read(spacesProvider.notifier).loadSpaces(),
@@ -171,9 +170,7 @@ class _HangoutScreenState extends ConsumerState<HangoutScreen> {
 
               // ── MY SPACES Section ──
               if (mySpaces.isNotEmpty) ...[
-                const SliverToBoxAdapter(
-                  child: Divider(height: 1),
-                ),
+                const SliverToBoxAdapter(child: Divider(height: 1)),
                 SliverToBoxAdapter(
                   child: SpaceSectionHeader(
                     title: 'My Spaces',
@@ -196,31 +193,26 @@ class _HangoutScreenState extends ConsumerState<HangoutScreen> {
                     horizontal: AddaSpacing.lg,
                   ),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final space = mySpaces[index];
-                        return SpaceCard(
-                          space: space,
-                          onTap: () => context.push(
-                            '/space/${space.id}/room',
-                            extra: space.name,
-                          ),
-                          onFavoriteTap: () => ref
-                              .read(spacesProvider.notifier)
-                              .toggleFavorite(space.id),
-                        );
-                      },
-                      childCount: mySpaces.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final space = mySpaces[index];
+                      return SpaceCard(
+                        space: space,
+                        onTap: () => context.push(
+                          '/space/${space.id}/room',
+                          extra: space.name,
+                        ),
+                        onFavoriteTap: () => ref
+                            .read(spacesProvider.notifier)
+                            .toggleFavorite(space.id),
+                      );
+                    }, childCount: mySpaces.length),
                   ),
                 ),
               ],
 
               // ── RECENTLY ACTIVE Section ──
               if (recentlyActive.isNotEmpty) ...[
-                const SliverToBoxAdapter(
-                  child: Divider(height: 1),
-                ),
+                const SliverToBoxAdapter(child: Divider(height: 1)),
                 const SliverToBoxAdapter(
                   child: SpaceSectionHeader(title: 'Recently Active'),
                 ),
@@ -229,30 +221,25 @@ class _HangoutScreenState extends ConsumerState<HangoutScreen> {
                     horizontal: AddaSpacing.lg,
                   ),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final space = recentlyActive[index];
-                        return SpaceCard(
-                          space: space,
-                          onTap: () => context.push(
-                            '/space/${space.id}/room',
-                            extra: space.name,
-                          ),
-                          onFavoriteTap: () => ref
-                              .read(spacesProvider.notifier)
-                              .toggleFavorite(space.id),
-                        );
-                      },
-                      childCount: recentlyActive.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final space = recentlyActive[index];
+                      return SpaceCard(
+                        space: space,
+                        onTap: () => context.push(
+                          '/space/${space.id}/room',
+                          extra: space.name,
+                        ),
+                        onFavoriteTap: () => ref
+                            .read(spacesProvider.notifier)
+                            .toggleFavorite(space.id),
+                      );
+                    }, childCount: recentlyActive.length),
                   ),
                 ),
               ],
 
               // Bottom padding for FAB clearance
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 80),
-              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 80)),
             ],
           );
         },

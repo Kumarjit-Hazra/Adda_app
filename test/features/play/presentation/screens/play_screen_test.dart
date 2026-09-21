@@ -11,9 +11,7 @@ void main() {
   });
 
   Widget buildTestApp() {
-    return const ProviderScope(
-      child: MaterialApp(home: PlayScreen()),
-    );
+    return const ProviderScope(child: MaterialApp(home: PlayScreen()));
   }
 
   group('PlayScreen Tests', () {
@@ -53,7 +51,7 @@ void main() {
         await tester.ensureVisible(unoFinder.first);
         expect(unoFinder, findsWidgets);
       }
-      
+
       // Tap on Party & Deception
       final partyFinder = find.text('Party & Deception');
       await tester.ensureVisible(partyFinder);
@@ -62,7 +60,7 @@ void main() {
 
       // UNO Clash (Cards) should no longer be in the grid
       expect(find.text('UNO Clash'), findsNothing);
-      
+
       // Bluff Masters (Party) should be in the grid
       final bluffFinder = find.text('Bluff Masters');
       if (bluffFinder.evaluate().isNotEmpty) {

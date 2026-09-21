@@ -15,17 +15,14 @@ void main() {
 
     Widget buildTestWidget() {
       return ProviderScope(
-        overrides: [
-          storageServiceProvider.overrideWithValue(storageService),
-        ],
-        child: const MaterialApp(
-          home: HangoutScreen(),
-        ),
+        overrides: [storageServiceProvider.overrideWithValue(storageService)],
+        child: const MaterialApp(home: HangoutScreen()),
       );
     }
 
-    testWidgets('renders Live Now section header when live spaces exist',
-        (tester) async {
+    testWidgets('renders Live Now section header when live spaces exist', (
+      tester,
+    ) async {
       await tester.pumpWidget(buildTestWidget());
       // Use pump() instead of pumpAndSettle() because LiveSpaceCard has
       // a repeating pulse animation that prevents settle.

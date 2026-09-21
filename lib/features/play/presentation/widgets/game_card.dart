@@ -214,7 +214,9 @@ class GameCard extends StatelessWidget {
                       Icon(
                         Icons.group_outlined,
                         size: 14,
-                        color: isDark ? AddaColors.textMutedDark : AddaColors.textMutedLight,
+                        color: isDark
+                            ? AddaColors.textMutedDark
+                            : AddaColors.textMutedLight,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
@@ -223,7 +225,9 @@ class GameCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: isDark ? AddaColors.textMutedDark : AddaColors.textMutedLight,
+                            color: isDark
+                                ? AddaColors.textMutedDark
+                                : AddaColors.textMutedLight,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -233,7 +237,9 @@ class GameCard extends StatelessWidget {
                       Icon(
                         Icons.timer_outlined,
                         size: 14,
-                        color: isDark ? AddaColors.textMutedDark : AddaColors.textMutedLight,
+                        color: isDark
+                            ? AddaColors.textMutedDark
+                            : AddaColors.textMutedLight,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
@@ -242,7 +248,9 @@ class GameCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: isDark ? AddaColors.textMutedDark : AddaColors.textMutedLight,
+                            color: isDark
+                                ? AddaColors.textMutedDark
+                                : AddaColors.textMutedLight,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

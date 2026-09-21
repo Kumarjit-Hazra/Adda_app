@@ -56,10 +56,7 @@ class _LiveSpaceCardState extends State<LiveSpaceCard>
               ? AddaColors.surfaceVariantDark
               : AddaColors.surfaceVariantLight,
           borderRadius: AddaRadius.radiusLg,
-          border: Border.all(
-            color: space.type.color.withAlpha(80),
-            width: 1.2,
-          ),
+          border: Border.all(color: space.type.color.withAlpha(80), width: 1.2),
           boxShadow: [
             BoxShadow(
               color: space.type.color.withAlpha(isDark ? 18 : 10),
@@ -109,11 +106,7 @@ class _LiveSpaceCardState extends State<LiveSpaceCard>
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.circle,
-                          size: 7,
-                          color: AddaColors.emerald,
-                        ),
+                        Icon(Icons.circle, size: 7, color: AddaColors.emerald),
                         SizedBox(width: 4),
                         Text(
                           'LIVE',
@@ -135,10 +128,7 @@ class _LiveSpaceCardState extends State<LiveSpaceCard>
             // Space name
             Text(
               space.name,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -147,8 +137,7 @@ class _LiveSpaceCardState extends State<LiveSpaceCard>
             // Activity badge
             if (space.currentActivityName != null)
               ActivityBadge(activityName: space.currentActivityName!),
-            if (space.currentActivityName != null)
-              const SizedBox(height: 8),
+            if (space.currentActivityName != null) const SizedBox(height: 8),
 
             // Participant count
             Row(

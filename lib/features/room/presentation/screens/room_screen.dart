@@ -290,6 +290,7 @@ class _RoomScreenState extends ConsumerState<RoomScreen> {
               child: RoomControlsBar(
                 isMuted: localParticipant.isMuted,
                 isVideoEnabled: localParticipant.isVideoEnabled,
+                mediaErrorState: room.mediaErrorState,
                 unreadChatCount: 0,
                 onToggleMic: () => ref.read(roomProvider.notifier).toggleMic(),
                 onToggleCamera: () =>

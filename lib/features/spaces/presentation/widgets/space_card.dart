@@ -223,4 +223,3 @@ class SpaceCard extends StatelessWidget {
     );
   }
 }
-

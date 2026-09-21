@@ -73,8 +73,10 @@ void main() {
   group('Hangout Provider Logic Tests', () {
     test('liveSpaces filters only live spaces sorted by participant count', () {
       final live = testSpaces.where((s) => s.isLive).toList()
-        ..sort((a, b) =>
-            b.activeParticipantCount.compareTo(a.activeParticipantCount));
+        ..sort(
+          (a, b) =>
+              b.activeParticipantCount.compareTo(a.activeParticipantCount),
+        );
 
       expect(live.length, 2);
       expect(live[0].id, 'spc_1'); // 5 participants, first
@@ -83,24 +85,24 @@ void main() {
 
     test('mySpaces returns favorited or owned spaces by user', () {
       const userId = 'user_1';
-      final mine = testSpaces
-          .where((s) => s.isFavorite || s.ownerId == userId)
-          .toList()
-        ..sort((a, b) => b.lastActiveAt.compareTo(a.lastActiveAt));
+      final mine =
+          testSpaces.where((s) => s.isFavorite || s.ownerId == userId).toList()
+            ..sort((a, b) => b.lastActiveAt.compareTo(a.lastActiveAt));
 
       expect(mine.length, 3); // spc_1 (fav+owned), spc_3 (owned), spc_4 (fav)
       expect(mine.first.id, 'spc_1'); // most recently active
     });
 
     test('recentlyActive excludes live spaces and limits to 5', () {
-      final recent = testSpaces
-          .where((s) => !s.isLive && s.lastActivityAt != null)
-          .toList()
-        ..sort((a, b) {
-          final aTime = a.lastActivityAt ?? DateTime(2000);
-          final bTime = b.lastActivityAt ?? DateTime(2000);
-          return bTime.compareTo(aTime);
-        });
+      final recent =
+          testSpaces
+              .where((s) => !s.isLive && s.lastActivityAt != null)
+              .toList()
+            ..sort((a, b) {
+              final aTime = a.lastActivityAt ?? DateTime(2000);
+              final bTime = b.lastActivityAt ?? DateTime(2000);
+              return bTime.compareTo(aTime);
+            });
       final limited = recent.take(5).toList();
 
       expect(limited.every((s) => !s.isLive), isTrue);

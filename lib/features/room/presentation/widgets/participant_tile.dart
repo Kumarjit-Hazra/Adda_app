@@ -82,7 +82,13 @@ class ParticipantTile extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (participant.isMuted)
+                    if (participant.isMediaUnavailable)
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        size: 12,
+                        color: AddaColors.rose,
+                      )
+                    else if (participant.isMuted)
                       const Icon(
                         Icons.mic_off_rounded,
                         size: 12,

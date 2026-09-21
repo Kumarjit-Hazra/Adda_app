@@ -11,6 +11,9 @@ class RoomSession {
   final String? activeActivityId;
   final bool isConnected;
   final bool isVoiceJoined;
+  final bool isMicEnabled;
+  final bool isCameraEnabled;
+  final String? mediaErrorState;
   final bool isSoloMode;
 
   const RoomSession({
@@ -23,6 +26,9 @@ class RoomSession {
     this.activeActivityId,
     this.isConnected = true,
     this.isVoiceJoined = false,
+    this.isMicEnabled = false,
+    this.isCameraEnabled = false,
+    this.mediaErrorState,
     this.isSoloMode = false,
   });
 
@@ -37,6 +43,10 @@ class RoomSession {
     bool clearActiveActivity = false,
     bool? isConnected,
     bool? isVoiceJoined,
+    bool? isMicEnabled,
+    bool? isCameraEnabled,
+    String? mediaErrorState,
+    bool clearMediaErrorState = false,
     bool? isSoloMode,
   }) {
     return RoomSession(
@@ -51,6 +61,11 @@ class RoomSession {
           : (activeActivityId ?? this.activeActivityId),
       isConnected: isConnected ?? this.isConnected,
       isVoiceJoined: isVoiceJoined ?? this.isVoiceJoined,
+      isMicEnabled: isMicEnabled ?? this.isMicEnabled,
+      isCameraEnabled: isCameraEnabled ?? this.isCameraEnabled,
+      mediaErrorState: clearMediaErrorState
+          ? null
+          : (mediaErrorState ?? this.mediaErrorState),
       isSoloMode: isSoloMode ?? this.isSoloMode,
     );
   }
