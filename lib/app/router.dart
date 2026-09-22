@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../features/chat/presentation/screens/chat_screen.dart';
 import '../features/discover/presentation/screens/discover_screen.dart';
-import '../features/games/twenty_nine/presentation/twenty_nine_game_screen.dart';
+import '../features/games/presentation/screens/active_game_screen.dart';
 import '../features/hangout/presentation/screens/hangout_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/play/presentation/screens/play_screen.dart';
@@ -121,17 +121,9 @@ final appRouter = GoRouter(
       path: '/play/solo/:gameId',
       builder: (context, state) {
         final gameId = state.pathParameters['gameId'] ?? '';
-        switch (gameId) {
-          case 'twenty_nine':
-            return const TwentyNineGameScreen();
-          default:
-            return Scaffold(
-              appBar: AppBar(title: Text('Unknown Game: $gameId')),
-              body: const Center(
-                child: Text('Game not available for solo play'),
-              ),
-            );
-        }
+        // We use the ActiveGameScreen shell for all games.
+        // Game-specific logic is injected inside it.
+        return ActiveGameScreen(gameId: gameId);
       },
     ),
   ],
