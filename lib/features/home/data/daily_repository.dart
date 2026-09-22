@@ -3,6 +3,8 @@ import '../../../../core/storage/storage_service.dart';
 import '../domain/models/daily_state.dart';
 import 'package:flutter/foundation.dart';
 
+/// NOTE: User answers to the Daily Adda are intentionally kept ephemeral
+/// for privacy. The repository only tracks completion status, not the answer text.
 class DailyRepository {
   final StorageService _storage;
   static const String _storageKey = 'daily_state_v1';
@@ -26,8 +28,11 @@ class DailyRepository {
 
   String _getPromptForDate(String dateId) {
     // Generate a deterministic prompt based on the date string
-    final hashCode = dateId.hashCode.abs();
-    return _prompts[hashCode % _prompts.length];
+    int hash = 0;
+    for (int i = 0; i < dateId.length; i++) {
+      hash = (31 * hash + dateId.codeUnitAt(i)) & 0xFFFFFFFF;
+    }
+    return _prompts[hash % _prompts.length];
   }
 
   Future<DailyState> getDailyState() async {
@@ -42,34 +47,12 @@ class DailyRepository {
 
         // Date rollover check
         if (storedState.dateId != currentDateId) {
-          // Verify if it's the next consecutive day for streak
-          // Parse dateId back to DateTime
-          final parts = storedState.dateId.split('-');
-          if (parts.length == 3) {
-            final storedDate = DateTime(
-              int.parse(parts[0]),
-              int.parse(parts[1]),
-              int.parse(parts[2]),
-            );
-            final diff = DateTime.now().difference(storedDate).inDays;
-
-            int newStreak = storedState.streakCount;
-            // If they completed both tasks yesterday, maintain streak, else reset
-            if (diff == 1 &&
-                storedState.isAddaAnswered &&
-                storedState.isBrainCompleted) {
-              // Streak maintained (will be incremented upon completion today)
-            } else if (diff > 1 ||
-                (!storedState.isAddaAnswered ||
-                    !storedState.isBrainCompleted)) {
-              newStreak = 0; // Reset
-            }
-
-            final newState = DailyState(
-              dateId: currentDateId,
-              dailyPrompt: prompt,
-              streakCount: newStreak,
-            );
+          final newState = DailyStreakCalculator.calculateNextState(
+            currentState: storedState,
+            currentDateId: currentDateId,
+            currentPrompt: prompt,
+          );
+          if (newState != storedState) {
             await saveDailyState(newState);
             return newState;
           }
@@ -93,5 +76,59 @@ class DailyRepository {
     } catch (e) {
       debugPrint('Error writing daily state: $e');
     }
+  }
+}
+
+class DailyStreakCalculator {
+  static DailyState calculateNextState({
+    required DailyState currentState,
+    required String currentDateId,
+    required String currentPrompt,
+  }) {
+    if (currentState.dateId == currentDateId) {
+      return currentState;
+    }
+
+    final currentParts = currentDateId.split('-');
+    final storedParts = currentState.dateId.split('-');
+
+    if (currentParts.length != 3 || storedParts.length != 3) {
+      return DailyState(dateId: currentDateId, dailyPrompt: currentPrompt);
+    }
+
+    final currentDate = DateTime(
+      int.parse(currentParts[0]),
+      int.parse(currentParts[1]),
+      int.parse(currentParts[2]),
+    );
+
+    final storedDate = DateTime(
+      int.parse(storedParts[0]),
+      int.parse(storedParts[1]),
+      int.parse(storedParts[2]),
+    );
+
+    // Difference in whole days
+    final diff = currentDate.difference(storedDate).inDays;
+
+    int newStreak = currentState.streakCount;
+
+    // If diff is 1 (yesterday) and BOTH were completed, maintain streak.
+    // Otherwise, the streak is lost.
+    // The streak only INCREMENTS when both are completed today.
+    if (diff == 1 &&
+        currentState.isAddaAnswered &&
+        currentState.isBrainCompleted) {
+      // Streak is maintained
+    } else {
+      // Gap > 1 day or didn't finish both yesterday -> Reset
+      newStreak = 0;
+    }
+
+    return DailyState(
+      dateId: currentDateId,
+      dailyPrompt: currentPrompt,
+      streakCount: newStreak,
+    );
   }
 }

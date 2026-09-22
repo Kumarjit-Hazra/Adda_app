@@ -6,7 +6,7 @@ import '../../../../shared/design_system/tokens/spacing.dart';
 import '../../../../shared/design_system/widgets/surface_card.dart';
 import '../../../activities/engine/activity_definition.dart';
 import '../../../games/domain/game_registry.dart';
-import '../../application/daily_providers.dart';
+import '../../domain/quick_play_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class QuickPlayCarousel extends ConsumerWidget {
@@ -15,13 +15,7 @@ class QuickPlayCarousel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Select a few diverse games for quick play
-    final List<String> quickPlayIds = [
-      'twenty_nine',
-      'uno',
-      'bluff',
-      'brain_arena',
-    ];
-    final games = quickPlayIds
+    final games = QuickPlayConfig.curatedGames
         .map((id) => GameRegistry.getDefinition(id))
         .whereType<GameDefinition>()
         .toList();
@@ -117,11 +111,12 @@ class QuickPlayCarousel extends ConsumerWidget {
       margin: const EdgeInsets.only(right: 12),
       child: SurfaceCard(
         onTap: () {
-          // If it's brain arena, mark it completed on the daily tasks
-          if (game.id == 'brain_arena') {
-            ref.read(dailyStateProvider.notifier).markBrainCompleted();
+          // TODO(Phase 10): Trigger markBrainCompleted() from GameResult/GameSession integration when implemented.
+          if (game.id == 'twenty_nine') {
+            context.push('/play/solo/${game.id}');
+          } else {
+            context.push('/play');
           }
-          context.push('/play/${game.id}');
         },
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         borderColor: color.withValues(alpha: 60),

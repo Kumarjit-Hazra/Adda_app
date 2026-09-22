@@ -29,6 +29,9 @@ class _DailyAddaCardState extends ConsumerState<DailyAddaCard> {
     // Mark as answered in DailyState
     ref.read(dailyStateProvider.notifier).markAddaAnswered();
 
+    // Clear the text so the UI immediately updates to the success state
+    _controller.clear();
+
     final shareText =
         'ADDA Daily Question: $prompt\n\nMy Answer: $answer\n\nJoin the Adda!';
 
@@ -36,11 +39,9 @@ class _DailyAddaCardState extends ConsumerState<DailyAddaCard> {
       // ignore: deprecated_member_use
       await Share.share(shareText);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Unable to share: $e')));
-      }
+      // Ignore share sheet cancellation or platform errors.
+      // Completion is tied to the intent to share, not the OS result.
+      debugPrint('Share sheet dismissed or failed: $e');
     }
   }
 

@@ -1,3 +1,7 @@
+/// Represents the user's daily progress on Home.
+///
+/// NOTE: The user's actual text answer for the Daily Adda is explicitly NOT stored
+/// for privacy reasons. This model only tracks the boolean completion status.
 class DailyState {
   final String dateId; // e.g., '2026-09-21'
   final String dailyPrompt;
