@@ -184,6 +184,9 @@ class QuizEngine implements ActivityEngine<QuizState> {
   }
 
   @override
+  String? getCurrentTurnPlayerId(QuizState state) => null;
+
+  @override
   bool isFinished(QuizState state) => state.isFinished;
 
   @override

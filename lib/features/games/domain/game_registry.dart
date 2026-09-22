@@ -1,3 +1,5 @@
+import '../../auth/domain/models/user_profile.dart';
+import 'game_session.dart';
 import '../../activities/engine/bot_player.dart';
 import '../../activities/engine/activity_engine.dart';
 import '../../activities/engine/activity_definition.dart';
@@ -43,6 +45,18 @@ class GameRegistry {
       botFactory: (playerId, difficulty) =>
           TwentyNineBotPlayer(playerId: playerId, difficulty: difficulty),
       supportsSolo: true, // Has a dedicated solo route and bot support.
+      soloPlayerFactory: (user) => [
+        GamePlayer.human(
+          id: user.id,
+          name: user.name,
+          avatarUrl: user.avatarUrl,
+          isHost: true,
+          teamIndex: 0,
+        ),
+        GamePlayer.bot(id: 'bot_1', name: 'Kabir Bot 🤖', teamIndex: 1),
+        GamePlayer.bot(id: 'bot_2', name: 'Diya Bot 🤖', teamIndex: 0),
+        GamePlayer.bot(id: 'bot_3', name: 'Aarav Bot 🤖', teamIndex: 1),
+      ],
     );
 
     _register(
@@ -56,6 +70,17 @@ class GameRegistry {
       engineFactory: () => UnoEngine(),
       botFactory: (playerId, difficulty) =>
           UnoBotPlayer(playerId: playerId, difficulty: difficulty),
+      supportsSolo: true,
+      soloPlayerFactory: (user) => [
+        GamePlayer.human(
+          id: user.id,
+          name: user.name,
+          avatarUrl: user.avatarUrl,
+          isHost: true,
+        ),
+        GamePlayer.bot(id: 'bot_1', name: 'Kabir Bot 🤖'),
+        GamePlayer.bot(id: 'bot_2', name: 'Diya Bot 🤖'),
+      ],
     );
 
     _register(
@@ -190,6 +215,7 @@ class GameRegistry {
     required ActivityEngine Function() engineFactory,
     BotPlayer Function(String, BotDifficulty)? botFactory,
     bool supportsSolo = false,
+    List<GamePlayer> Function(UserProfile)? soloPlayerFactory,
   }) {
     _definitions[id] = GameDefinition(
       id: id,
@@ -200,6 +226,7 @@ class GameRegistry {
       maxPlayers: maxPlayers,
       estimatedDuration: estimatedDuration,
       supportsSolo: supportsSolo,
+      soloPlayerFactory: soloPlayerFactory,
     );
     _engineFactories[id] = engineFactory;
     if (botFactory != null) {
@@ -277,6 +304,9 @@ class GameDefinition {
   /// widgets must not hard-code game IDs to determine routing.
   final bool supportsSolo;
 
+  /// Factory method to create the initial players for a solo game.
+  final List<GamePlayer> Function(UserProfile user)? soloPlayerFactory;
+
   const GameDefinition({
     required this.id,
     required this.activityId,
@@ -289,6 +319,7 @@ class GameDefinition {
     this.description,
     this.iconName,
     this.supportsSolo = false,
+    this.soloPlayerFactory,
   });
 
   /// Creates a copy with additional metadata.
@@ -297,6 +328,7 @@ class GameDefinition {
     String? description,
     String? iconName,
     bool? supportsSolo,
+    List<GamePlayer> Function(UserProfile)? soloPlayerFactory,
   }) {
     return GameDefinition(
       id: id,
@@ -310,6 +342,7 @@ class GameDefinition {
       description: description ?? this.description,
       iconName: iconName ?? this.iconName,
       supportsSolo: supportsSolo ?? this.supportsSolo,
+      soloPlayerFactory: soloPlayerFactory ?? this.soloPlayerFactory,
     );
   }
 

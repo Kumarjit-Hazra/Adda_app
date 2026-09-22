@@ -12,6 +12,11 @@ abstract class ActivityEngine<TState> {
 
   TState applyAction(TState state, PlayerAction action);
 
+  /// Returns the ID of the player whose turn it is to act.
+  /// Returns null if the game does not have a single active player
+  /// (e.g., simultaneous actions) or if the game is finished.
+  String? getCurrentTurnPlayerId(TState state);
+
   bool isFinished(TState state);
 
   Map<String, dynamic> getResult(TState state);

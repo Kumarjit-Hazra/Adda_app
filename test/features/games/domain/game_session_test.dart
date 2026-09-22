@@ -18,6 +18,10 @@ class MockEngine implements ActivityEngine<String> {
     estimatedDuration: Duration(minutes: 5),
     rules: 'Mock rules',
   );
+
+  @override
+  String? getCurrentTurnPlayerId(String state) => null;
+
   @override
   String createInitialState(List<String> playerIds) => 'init_state';
 

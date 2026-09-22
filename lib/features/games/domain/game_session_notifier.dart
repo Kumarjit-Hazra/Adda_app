@@ -137,16 +137,37 @@ class GameSessionNotifier extends StateNotifier<GameSession?> {
       return;
     }
 
-    // Find any bot that can take an action
-    for (final player in currentSession.players) {
+    final currentPlayerId = _engine.getCurrentTurnPlayerId(
+      currentSession.state,
+    );
+
+    if (currentPlayerId != null) {
+      // Specific turn target
+      final player = currentSession.players.firstWhere(
+        (p) => p.id == currentPlayerId,
+        orElse: () => currentSession.players.first,
+      );
+
       if (!player.isHuman) {
         final bot = GameRegistry.createBot(currentSession.gameId, player.id);
         if (bot != null) {
           final action = bot.computeNextAction(currentSession.state);
           if (action != null) {
-            // Dispatch the first valid bot action found
             dispatchAction(action);
-            return; // Exit loop; dispatchAction will reschedule next turn
+          }
+        }
+      }
+    } else {
+      // Fallback for simultaneous or unstructured games
+      for (final player in currentSession.players) {
+        if (!player.isHuman) {
+          final bot = GameRegistry.createBot(currentSession.gameId, player.id);
+          if (bot != null) {
+            final action = bot.computeNextAction(currentSession.state);
+            if (action != null) {
+              dispatchAction(action);
+              return;
+            }
           }
         }
       }

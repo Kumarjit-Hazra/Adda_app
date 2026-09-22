@@ -185,6 +185,9 @@ class CoupleModeEngine implements ActivityEngine<CoupleModeState> {
   }
 
   @override
+  String? getCurrentTurnPlayerId(CoupleModeState state) => null;
+
+  @override
   bool isFinished(CoupleModeState state) => state.isFinished;
 
   @override

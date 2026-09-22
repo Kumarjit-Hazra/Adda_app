@@ -218,7 +218,7 @@ echo -e "  ${GRAY}Message:${RESET} ${COMMIT_MESSAGE}"
 echo ""
 line
 echo ""
-echo -e "  ${MAGENTA}✨ Shipped. Go build the next thing. 🚀${RESET}"
+echo -e "  ${MAGENTA} Shipped🗿${RESET}"
 echo ""
 
 tput cnorm 2>/dev/null || true

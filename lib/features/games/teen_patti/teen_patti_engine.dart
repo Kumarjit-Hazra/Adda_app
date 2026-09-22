@@ -197,6 +197,9 @@ class TeenPattiEngine implements ActivityEngine<TeenPattiState> {
   }
 
   @override
+  String? getCurrentTurnPlayerId(TeenPattiState state) => null;
+
+  @override
   bool isFinished(TeenPattiState state) => state.isFinished;
 
   @override

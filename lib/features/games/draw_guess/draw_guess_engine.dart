@@ -144,6 +144,9 @@ class DrawGuessEngine implements ActivityEngine<DrawGuessState> {
   }
 
   @override
+  String? getCurrentTurnPlayerId(DrawGuessState state) => null;
+
+  @override
   bool isFinished(DrawGuessState state) => state.isFinished;
 
   @override

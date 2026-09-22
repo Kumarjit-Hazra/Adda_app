@@ -121,6 +121,9 @@ class BrainArenaEngine implements ActivityEngine<BrainArenaState> {
   }
 
   @override
+  String? getCurrentTurnPlayerId(BrainArenaState state) => null;
+
+  @override
   bool isFinished(BrainArenaState state) => state.isFinished;
 
   @override

@@ -199,6 +199,9 @@ class RummyEngine implements ActivityEngine<RummyState> {
   }
 
   @override
+  String? getCurrentTurnPlayerId(RummyState state) => null;
+
+  @override
   bool isFinished(RummyState state) => state.isFinished;
 
   @override

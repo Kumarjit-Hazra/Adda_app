@@ -252,6 +252,9 @@ class MafiaEngine implements ActivityEngine<MafiaState> {
   }
 
   @override
+  String? getCurrentTurnPlayerId(MafiaState state) => null;
+
+  @override
   bool isFinished(MafiaState state) => state.isFinished;
 
   @override

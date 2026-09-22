@@ -251,6 +251,12 @@ class UnoEngine implements ActivityEngine<UnoState> {
   }
 
   @override
+  String? getCurrentTurnPlayerId(UnoState state) {
+    if (state.winnerId != null) return null;
+    return state.playerIds[state.currentTurnIndex];
+  }
+
+  @override
   bool isFinished(UnoState state) => state.winnerId != null;
 
   @override

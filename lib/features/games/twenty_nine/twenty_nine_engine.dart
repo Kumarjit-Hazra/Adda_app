@@ -281,6 +281,12 @@ class TwentyNineEngine implements ActivityEngine<TwentyNineState> {
   }
 
   @override
+  String? getCurrentTurnPlayerId(TwentyNineState state) {
+    if (state.phase == TwentyNinePhase.finished) return null;
+    return state.playerIds[state.currentTurnIndex];
+  }
+
+  @override
   bool isFinished(TwentyNineState state) =>
       state.phase == TwentyNinePhase.finished;
 

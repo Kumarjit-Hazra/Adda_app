@@ -20,6 +20,9 @@ class MockEngine implements ActivityEngine<String> {
     rules: 'Mock rules',
   );
   @override
+  String? getCurrentTurnPlayerId(String state) => null;
+
+  @override
   String createInitialState(List<String> playerIds) => 'state_1';
 
   @override

@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
-import '../../../../core/audio/audio_service.dart';
-import '../../../../core/haptics/haptics_service.dart';
 import '../../../../shared/design_system/tokens/colors.dart';
 import '../../../../shared/design_system/tokens/radius.dart';
 import '../../../../shared/design_system/widgets/app_button.dart';
 import '../../../../shared/design_system/widgets/surface_card.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../activities/engine/player_action.dart';
 
 import '../../domain/game_session_notifier.dart';
 import '../twenty_nine_models.dart';
+import 'twenty_nine_controller.dart';
 
 class TwentyNineBoard extends ConsumerStatefulWidget {
   const TwentyNineBoard({super.key});
@@ -23,29 +20,12 @@ class TwentyNineBoard extends ConsumerStatefulWidget {
 class _TwentyNineBoardState extends ConsumerState<TwentyNineBoard> {
   int _bidSelection = 17;
 
-  void _dispatch(String type, Map<String, dynamic> payload) {
-    final session = ref.read(gameSessionProvider('twenty_nine'));
-    if (session == null) return;
+  late final TwentyNineController _controller;
 
-    final user = ref.read(authProvider).valueOrNull;
-    final myId = user?.id ?? session.players.first.id;
-
-    final action = PlayerAction(
-      actionId: const Uuid().v4(),
-      playerId: myId,
-      activityId: 'twenty_nine',
-      type: type,
-      payload: payload,
-      clientSequence: session.version,
-    );
-
-    final notifier = ref.read(
-      gameSessionNotifierProvider('twenty_nine').notifier,
-    );
-    if (notifier.dispatchAction(action)) {
-      AudioService.playCardPlay();
-      HapticsService.cardPlay();
-    }
+  @override
+  void initState() {
+    super.initState();
+    _controller = TwentyNineController(ref);
   }
 
   @override
@@ -255,7 +235,8 @@ class _TwentyNineBoardState extends ConsumerState<TwentyNineBoard> {
                 if (!state.isTrumpRevealed && isMyTurn)
                   AppButton.ghost(
                     text: 'Reveal Trump 🔓',
-                    onPressed: () => _dispatch('reveal_trump', {}),
+                    onPressed: () =>
+                        _controller.revealTrump(myId, state.version),
                   ),
               ],
             ),
@@ -298,11 +279,12 @@ class _TwentyNineBoardState extends ConsumerState<TwentyNineBoard> {
                   children: [
                     AppButton.ghost(
                       text: 'Pass',
-                      onPressed: () => _dispatch('bid', {'pass': true}),
+                      onPressed: () => _controller.passBid(myId, state.version),
                     ),
                     AppButton(
                       text: 'Bid $_bidSelection',
-                      onPressed: () => _dispatch('bid', {'bid': _bidSelection}),
+                      onPressed: () =>
+                          _controller.bid(_bidSelection, myId, state.version),
                     ),
                   ],
                 ),
@@ -324,7 +306,11 @@ class _TwentyNineBoardState extends ConsumerState<TwentyNineBoard> {
                 final card = myHand[index];
                 return GestureDetector(
                   onTap: isMyTurn && state.phase == TwentyNinePhase.playing
-                      ? () => _dispatch('play_card', {'card': card.toMap()})
+                      ? () => _controller.playCard(
+                          card.toMap(),
+                          myId,
+                          state.version,
+                        )
                       : null,
                   child: _buildCardTile(card, isMyTurn: isMyTurn),
                 );

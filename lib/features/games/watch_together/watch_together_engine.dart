@@ -132,6 +132,9 @@ class WatchTogetherEngine implements ActivityEngine<WatchTogetherState> {
   }
 
   @override
+  String? getCurrentTurnPlayerId(WatchTogetherState state) => null;
+
+  @override
   bool isFinished(WatchTogetherState state) => state.isFinished;
 
   @override

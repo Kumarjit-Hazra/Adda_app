@@ -6,10 +6,10 @@ import '../../../../shared/design_system/widgets/app_scaffold.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/game_session.dart';
 import '../../domain/game_session_notifier.dart';
-import '../../twenty_nine/presentation/twenty_nine_board.dart';
+import '../../domain/game_registry.dart';
+import '../game_presentation_registry.dart';
 import '../widgets/game_overlay.dart';
 import '../widgets/game_top_bar.dart';
-import '../../twenty_nine/twenty_nine_models.dart';
 
 class ActiveGameScreen extends ConsumerStatefulWidget {
   final String gameId;
@@ -35,37 +35,35 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
     final user = ref.read(authProvider).valueOrNull;
     if (user == null) return;
 
+    final definition = GameRegistry.getDefinition(widget.gameId);
+    final adapter = GamePresentationRegistry.getAdapter(widget.gameId);
+
+    if (definition == null || adapter == null || !definition.supportsSolo) {
+      if (mounted) {
+        setState(() {
+          _initializing = false;
+        });
+      }
+      return;
+    }
+
     final notifier = ref.read(
       gameSessionNotifierProvider(widget.gameId).notifier,
     );
 
-    // TODO: Ideally we configure bots based on game definition.
-    // Since TwentyNine is our reference, we hardcode 3 bots here for solo mode if it's twenty_nine
-    List<GamePlayer> players = [];
-    if (widget.gameId == 'twenty_nine') {
-      players = [
-        GamePlayer.human(
-          id: user.id,
-          name: user.name,
-          avatarUrl: user.avatarUrl,
-          isHost: true,
-          teamIndex: 0,
-        ),
-        GamePlayer.bot(id: 'bot_1', name: 'Kabir Bot 🤖', teamIndex: 1),
-        GamePlayer.bot(id: 'bot_2', name: 'Diya Bot 🤖', teamIndex: 0),
-        GamePlayer.bot(id: 'bot_3', name: 'Aarav Bot 🤖', teamIndex: 1),
-      ];
+    final factory = definition.soloPlayerFactory;
+    List<GamePlayer> players;
+    if (factory != null) {
+      players = factory(user);
     } else {
-      // Generic fallback for future games
       players = [
         GamePlayer.human(
           id: user.id,
           name: user.name,
           avatarUrl: user.avatarUrl,
           isHost: true,
-          teamIndex: 0,
         ),
-        GamePlayer.bot(id: 'bot_1', name: 'Bot 🤖', teamIndex: 1),
+        GamePlayer.bot(id: 'bot_1', name: 'Bot 🤖'),
       ];
     }
 
@@ -91,13 +89,14 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
   }
 
   String _getGameTitle() {
-    if (widget.gameId == 'twenty_nine') return '29 Cards';
-    return 'Game';
+    final def = GameRegistry.getDefinition(widget.gameId);
+    return def?.title ?? 'Game';
   }
 
   Widget _buildGameBoard() {
-    if (widget.gameId == 'twenty_nine') {
-      return const TwentyNineBoard();
+    final adapter = GamePresentationRegistry.getAdapter(widget.gameId);
+    if (adapter != null) {
+      return adapter.buildBoard();
     }
     return const Center(
       child: Text(
@@ -109,19 +108,11 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
 
   String? _getResultMessage(GameSession session) {
     if (!session.isFinished) return null;
-
-    // For 29 specifically, check team
-    if (widget.gameId == 'twenty_nine' && session.state is TwentyNineState) {
-      final state = session.state as TwentyNineState;
-      if (state.winnerTeam == 0) {
-        return '🏆 YOU & DIYA WON!';
-      } else {
-        return 'DEFEAT — OPPONENTS WON';
-      }
-    }
-
-    // Generic fallback
+    final adapter = GamePresentationRegistry.getAdapter(widget.gameId);
     final user = ref.read(authProvider).valueOrNull;
+    if (adapter != null && user != null) {
+      return adapter.getResultMessage(session, user.id);
+    }
     if (user != null && session.result?.winnerIds.contains(user.id) == true) {
       return '🏆 YOU WON!';
     }
@@ -129,10 +120,11 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
   }
 
   bool _isVictory(GameSession session) {
-    if (widget.gameId == 'twenty_nine' && session.state is TwentyNineState) {
-      return (session.state as TwentyNineState).winnerTeam == 0;
-    }
+    final adapter = GamePresentationRegistry.getAdapter(widget.gameId);
     final user = ref.read(authProvider).valueOrNull;
+    if (adapter != null && user != null) {
+      return adapter.isVictory(session, user.id);
+    }
     return user != null && session.result?.winnerIds.contains(user.id) == true;
   }
 
@@ -168,16 +160,54 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
           if (!_initializing && session != null)
             Positioned.fill(child: _buildGameBoard()),
 
+          // Overlay (Unavailable)
+          if (!_initializing && session == null)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black87,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.videogame_asset_off,
+                        size: 64,
+                        color: Colors.white54,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Game Unavailable',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'This game is not available for solo play yet.',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _handleExit,
+                        child: const Text('Back to Play'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
           // Overlay (Loading / Result)
-          if (_initializing || session == null || session.isFinished)
+          if ((_initializing || (session != null && session.isFinished)) &&
+              session != null)
             Positioned.fill(
               child: GameOverlay(
-                isLoading: _initializing || session == null,
-                isFinished: session?.isFinished ?? false,
-                resultMessage: session != null
-                    ? _getResultMessage(session)
-                    : null,
-                isVictory: session != null ? _isVictory(session) : false,
+                isLoading: _initializing,
+                isFinished: session.isFinished,
+                resultMessage: _getResultMessage(session),
+                isVictory: _isVictory(session),
                 onRematch: _handleRematch,
                 onExit: _handleExit,
               ),

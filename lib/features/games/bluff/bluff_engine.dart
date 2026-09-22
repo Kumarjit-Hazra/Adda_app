@@ -194,6 +194,9 @@ class BluffEngine implements ActivityEngine<BluffState> {
   }
 
   @override
+  String? getCurrentTurnPlayerId(BluffState state) => null;
+
+  @override
   bool isFinished(BluffState state) => state.winnerId != null;
 
   @override

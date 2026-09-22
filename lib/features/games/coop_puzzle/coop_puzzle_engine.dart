@@ -125,6 +125,9 @@ class CoopPuzzleEngine implements ActivityEngine<CoopPuzzleState> {
   }
 
   @override
+  String? getCurrentTurnPlayerId(CoopPuzzleState state) => null;
+
+  @override
   bool isFinished(CoopPuzzleState state) => state.isSolved || state.isFailed;
 
   @override
