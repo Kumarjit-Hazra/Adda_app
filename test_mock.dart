@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 abstract class A {
   void foo();
 }
