@@ -2,9 +2,12 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart' hide Image;
 
 class PlayerSeatComponent extends PositionComponent {
-  final String playerId;
-  final String name;
-  final bool isTurn;
+  String playerId;
+  String name;
+  bool isTurn;
+
+  TextComponent? _initialComp;
+  TextComponent? _nameComp;
 
   PlayerSeatComponent({
     required this.playerId,
@@ -14,14 +17,6 @@ class PlayerSeatComponent extends PositionComponent {
 
   @override
   Future<void> onLoad() async {
-    final namePaint = TextPaint(
-      style: TextStyle(
-        fontSize: 11,
-        fontWeight: isTurn ? FontWeight.w700 : FontWeight.w500,
-        color: isTurn ? const Color(0xFF10B981) : Colors.white70,
-      ),
-    );
-
     final avatarPaint = TextPaint(
       style: const TextStyle(
         color: Colors.white,
@@ -33,17 +28,50 @@ class PlayerSeatComponent extends PositionComponent {
     final centerX = size.x / 2;
 
     final initial = name.isNotEmpty ? name[0] : '?';
-    final initialComp = TextComponent(text: initial, textRenderer: avatarPaint);
-    initialComp.position = Vector2(
+    _initialComp = TextComponent(text: initial, textRenderer: avatarPaint);
+    _initialComp!.position = Vector2(
       centerX - 4,
       14,
     ); // roughly centered in circle
-    add(initialComp);
+    add(_initialComp!);
 
-    final nameStr = name.length > 8 ? '${name.substring(0, 8)}...' : name;
-    final nameComp = TextComponent(text: nameStr, textRenderer: namePaint);
-    nameComp.position = Vector2(centerX - 16, 44);
-    add(nameComp);
+    _nameComp = TextComponent(
+      text: _formatName(name),
+      textRenderer: _getNamePaint(),
+    );
+    _nameComp!.position = Vector2(centerX - 16, 44);
+    add(_nameComp!);
+  }
+
+  void updatePlayer(String newPlayerId, String newName, bool newIsTurn) {
+    bool requiresRedraw = isTurn != newIsTurn || name != newName;
+    playerId = newPlayerId;
+    name = newName;
+    isTurn = newIsTurn;
+
+    if (requiresRedraw) {
+      if (_initialComp != null) {
+        _initialComp!.text = name.isNotEmpty ? name[0] : '?';
+      }
+      if (_nameComp != null) {
+        _nameComp!.text = _formatName(name);
+        _nameComp!.textRenderer = _getNamePaint();
+      }
+    }
+  }
+
+  String _formatName(String rawName) {
+    return rawName.length > 8 ? '${rawName.substring(0, 8)}...' : rawName;
+  }
+
+  TextPaint _getNamePaint() {
+    return TextPaint(
+      style: TextStyle(
+        fontSize: 11,
+        fontWeight: isTurn ? FontWeight.w700 : FontWeight.w500,
+        color: isTurn ? const Color(0xFF10B981) : Colors.white70,
+      ),
+    );
   }
 
   @override

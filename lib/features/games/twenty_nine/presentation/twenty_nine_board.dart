@@ -30,6 +30,12 @@ class _TwentyNineBoardState extends ConsumerState<TwentyNineBoard> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final session = ref.watch(gameSessionProvider('twenty_nine'));
     final user = ref.watch(authProvider).valueOrNull;

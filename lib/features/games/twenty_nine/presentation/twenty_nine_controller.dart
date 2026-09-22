@@ -10,8 +10,13 @@ import '../../domain/game_session_notifier.dart';
 class TwentyNineController {
   final WidgetRef ref;
   final String gameId = 'twenty_nine';
+  bool _isDisposed = false;
 
   TwentyNineController(this.ref);
+
+  void dispose() {
+    _isDisposed = true;
+  }
 
   void dispatch(
     String type,
@@ -19,6 +24,11 @@ class TwentyNineController {
     required String playerId,
     required int currentVersion,
   }) {
+    if (_isDisposed) return;
+    
+    // Safety check to ensure provider still exists before dispatching
+    if (!ref.exists(gameSessionNotifierProvider(gameId))) return;
+
     final action = PlayerAction(
       actionId: const Uuid().v4(),
       playerId: playerId,

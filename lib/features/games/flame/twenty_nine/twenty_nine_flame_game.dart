@@ -4,9 +4,11 @@ import 'package:flame/events.dart';
 import '../../twenty_nine/twenty_nine_models.dart';
 import '../../twenty_nine/presentation/twenty_nine_controller.dart';
 import '../core/adda_flame_game.dart';
+import '../../domain/game_session.dart';
 import 'components/card_component.dart';
 import 'components/player_seat_component.dart';
 import 'components/trick_component.dart';
+import 'models/twenty_nine_presentation_snapshot.dart';
 
 class TwentyNineFlameGame extends AddaFlameGame<TwentyNineState>
     with TapCallbacks {
@@ -19,30 +21,38 @@ class TwentyNineFlameGame extends AddaFlameGame<TwentyNineState>
   TrickComponent? _trickComponent;
 
   final List<CardComponent> _handCards = [];
+  TwentyNinePresentationSnapshot? _snapshot;
 
   TwentyNineFlameGame({required this.controller, required this.localUserId});
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    // Initialize components if state is already present
-    if (gameState != null) {
-      _rebuildBoard(gameState!);
+    // Pre-create components
+    _trickComponent = TrickComponent(currentTrick: [], isMyTurn: false);
+    add(_trickComponent!);
+
+    _topSeat = PlayerSeatComponent(playerId: '', name: '', isTurn: false);
+    add(_topSeat!);
+
+    _leftSeat = PlayerSeatComponent(playerId: '', name: '', isTurn: false);
+    add(_leftSeat!);
+
+    _rightSeat = PlayerSeatComponent(playerId: '', name: '', isTurn: false);
+    add(_rightSeat!);
+
+    if (gameSession != null && gameState != null) {
+      _applyStateUpdate(gameSession!, gameState!);
     }
   }
 
   @override
-  void onStateUpdate(TwentyNineState state) {
-    _rebuildBoard(state);
+  void onStateUpdate(GameSession session, TwentyNineState state) {
+    _applyStateUpdate(session, state);
   }
 
-  void _rebuildBoard(TwentyNineState state) {
+  void _applyStateUpdate(GameSession session, TwentyNineState state) {
     if (!isMounted) return;
-
-    // We assume 4 players. Top, Left, Right, Bottom (us).
-    // In ADDA's current board: index 2 is top (partner), index 1 is left, index 3 is right.
-    // Wait, the players list might not be indexed this way, but TwentyNineState
-    // provides playerIds ordered by turn sequence.
 
     final myIndex = state.playerIds.indexOf(localUserId);
     if (myIndex == -1) return; // Spectator or not in game
@@ -55,100 +65,112 @@ class TwentyNineFlameGame extends AddaFlameGame<TwentyNineState>
     final topId = state.playerIds[topIndex];
     final rightId = state.playerIds[rightIndex];
 
-    // Cleanup old components
-    if (_topSeat != null) remove(_topSeat!);
-    if (_leftSeat != null) remove(_leftSeat!);
-    if (_rightSeat != null) remove(_rightSeat!);
-    if (_trickComponent != null) remove(_trickComponent!);
+    final currentTurnId = state.playerIds[state.currentTurnIndex];
 
-    removeAll(_handCards);
-    _handCards.clear();
-
-    // Recreate Trick
-    _trickComponent = TrickComponent(
+    final newSnapshot = TwentyNinePresentationSnapshot(
+      phase: state.phase,
+      version: state.version,
+      myHand: state.hands[localUserId] ?? [],
       currentTrick: state.currentTrick,
-      isMyTurn:
-          state.playerIds[state.currentTurnIndex] == localUserId &&
-          state.phase == TwentyNinePhase.playing,
+      myData: PlayerPresentationData(
+        id: localUserId,
+        name: _getPlayerName(session, localUserId),
+        isTurn: currentTurnId == localUserId,
+      ),
+      leftData: PlayerPresentationData(
+        id: leftId,
+        name: _getPlayerName(session, leftId),
+        isTurn: currentTurnId == leftId,
+      ),
+      topData: PlayerPresentationData(
+        id: topId,
+        name: _getPlayerName(session, topId),
+        isTurn: currentTurnId == topId,
+      ),
+      rightData: PlayerPresentationData(
+        id: rightId,
+        name: _getPlayerName(session, rightId),
+        isTurn: currentTurnId == rightId,
+      ),
     );
 
-    // Position trick in center
-    _trickComponent!.position = Vector2(size.x / 2 - 100, size.y / 2 - 90);
-    add(_trickComponent!);
+    if (_snapshot == newSnapshot) return;
 
-    // Top seat
-    _topSeat = PlayerSeatComponent(
-      playerId: topId,
-      name: _getPlayerName(topId),
-      isTurn: state.playerIds[state.currentTurnIndex] == topId,
-    );
-    _topSeat!.position = Vector2(size.x / 2 - 40, 20); // Top center
-    add(_topSeat!);
+    _updateComponents(newSnapshot);
+    _snapshot = newSnapshot;
+  }
 
-    // Left seat
-    _leftSeat = PlayerSeatComponent(
-      playerId: leftId,
-      name: _getPlayerName(leftId),
-      isTurn: state.playerIds[state.currentTurnIndex] == leftId,
-    );
-    _leftSeat!.position = Vector2(10, size.y / 2 - 30); // Left middle
-    add(_leftSeat!);
-
-    // Right seat
-    _rightSeat = PlayerSeatComponent(
-      playerId: rightId,
-      name: _getPlayerName(rightId),
-      isTurn: state.playerIds[state.currentTurnIndex] == rightId,
-    );
-    _rightSeat!.position = Vector2(
-      size.x - 90,
-      size.y / 2 - 30,
-    ); // Right middle
-    add(_rightSeat!);
-
-    // Player Hand (Bottom)
-    final myHand = state.hands[localUserId] ?? [];
-    final handWidth = myHand.length * 62.0; // 58 card width + 4 margin
-    final startX = (size.x - handWidth) / 2;
-
-    final isMyTurn = state.playerIds[state.currentTurnIndex] == localUserId;
-
-    for (int i = 0; i < myHand.length; i++) {
-      final card = myHand[i];
-      final cardComp = CardComponent(
-        card: card,
-        isMyTurn: isMyTurn && state.phase == TwentyNinePhase.playing,
-        onPlay: (PlayingCard playedCard) {
-          controller.playCard(playedCard.toMap(), localUserId, state.version);
-        },
-      );
-
-      cardComp.position = Vector2(startX + (i * 62), size.y - 100);
-      _handCards.add(cardComp);
-      add(cardComp);
+  String _getPlayerName(GameSession session, String playerId) {
+    if (playerId.startsWith('bot_')) return 'Bot ${playerId.split('_').last}';
+    try {
+      return session.players.firstWhere((p) => p.id == playerId).name;
+    } catch (_) {
+      return playerId.length > 4 ? playerId.substring(0, 4) : playerId;
     }
   }
 
-  String _getPlayerName(String playerId) {
-    // We don't have direct access to GameSession.players here.
-    // The name is normally retrieved from GameSession.
-    // Since we don't pass GameSession to Flame, only TwentyNineState,
-    // and TwentyNineState only has IDs, we might need a workaround.
-    // For simplicity, we just use the ID as a placeholder or 'Player X'.
-    // Ideally, state would carry names, but to preserve architecture without
-    // modifying domain excessively, we'll use a shortened ID.
-    if (playerId == 'bot_1') return 'Bot 1';
-    if (playerId == 'bot_2') return 'Bot 2';
-    if (playerId == 'bot_3') return 'Bot 3';
-    return playerId.length > 4 ? playerId.substring(0, 4) : playerId;
+  void _updateComponents(TwentyNinePresentationSnapshot snapshot) {
+    _trickComponent?.updateTrick(
+      snapshot.currentTrick.toList(), 
+      snapshot.myData.isTurn && snapshot.phase == TwentyNinePhase.playing
+    );
+
+    _topSeat?.updatePlayer(snapshot.topData.id, snapshot.topData.name, snapshot.topData.isTurn);
+    _leftSeat?.updatePlayer(snapshot.leftData.id, snapshot.leftData.name, snapshot.leftData.isTurn);
+    _rightSeat?.updatePlayer(snapshot.rightData.id, snapshot.rightData.name, snapshot.rightData.isTurn);
+
+    // Diff hand cards
+    if (_snapshot == null || 
+        !_listEquals(_snapshot!.myHand, snapshot.myHand) || 
+        _snapshot!.phase != snapshot.phase || 
+        _snapshot!.myData.isTurn != snapshot.myData.isTurn) {
+          
+       removeAll(_handCards);
+       _handCards.clear();
+       
+       for (int i = 0; i < snapshot.myHand.length; i++) {
+         final card = snapshot.myHand[i];
+         final cardComp = CardComponent(
+           card: card,
+           isMyTurn: snapshot.myData.isTurn && snapshot.phase == TwentyNinePhase.playing,
+           onPlay: (PlayingCard playedCard) {
+             controller.playCard(playedCard.toMap(), localUserId, snapshot.version);
+           },
+         );
+         _handCards.add(cardComp);
+         add(cardComp);
+       }
+       _layoutHand();
+    }
+  }
+
+  bool _listEquals(List a, List b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   @override
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
-    // Re-layout if state exists
-    if (gameState != null) {
-      _rebuildBoard(gameState!);
+    _layoutBoard();
+  }
+
+  void _layoutBoard() {
+    _trickComponent?.position = Vector2(size.x / 2 - 100, size.y / 2 - 90);
+    _topSeat?.position = Vector2(size.x / 2 - 40, 20);
+    _leftSeat?.position = Vector2(10, size.y / 2 - 30);
+    _rightSeat?.position = Vector2(size.x - 90, size.y / 2 - 30);
+    _layoutHand();
+  }
+
+  void _layoutHand() {
+    final handWidth = _handCards.length * 62.0; 
+    final startX = (size.x - handWidth) / 2;
+    for (int i = 0; i < _handCards.length; i++) {
+      _handCards[i].position = Vector2(startX + (i * 62), size.y - 100);
     }
   }
 }

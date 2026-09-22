@@ -4,15 +4,17 @@ import '../../../twenty_nine/twenty_nine_models.dart';
 import 'card_component.dart';
 
 class TrickComponent extends PositionComponent {
-  final List<PlayedTrickCard> currentTrick;
-  final bool isMyTurn;
+  final List<PlayedTrickCard> _currentTrick = [];
+  bool isMyTurn;
 
   TextComponent? _emptyTextComp;
 
   TrickComponent({
-    required this.currentTrick,
+    required List<PlayedTrickCard> currentTrick,
     this.isMyTurn = false,
-  }) : super(size: Vector2(200, 180));
+  }) : super(size: Vector2(200, 180)) {
+    _currentTrick.addAll(currentTrick);
+  }
 
   @override
   Future<void> onLoad() async {
@@ -33,12 +35,21 @@ class TrickComponent extends PositionComponent {
   }
 
   void updateTrick(List<PlayedTrickCard> newTrick, bool newIsMyTurn) {
-    if (newTrick.length != currentTrick.length ||
-        (newTrick.isNotEmpty &&
-            currentTrick.isNotEmpty &&
-            newTrick.last.card.suit != currentTrick.last.card.suit)) {
-      currentTrick.clear();
-      currentTrick.addAll(newTrick);
+    bool shouldSync = false;
+    
+    if (_currentTrick.length != newTrick.length || 
+        (_currentTrick.isNotEmpty && newTrick.isNotEmpty && _currentTrick.last.card.id != newTrick.last.card.id)) {
+      _currentTrick.clear();
+      _currentTrick.addAll(newTrick);
+      shouldSync = true;
+    }
+    
+    if (isMyTurn != newIsMyTurn) {
+      isMyTurn = newIsMyTurn;
+      shouldSync = true;
+    }
+
+    if (shouldSync) {
       _syncCards();
     }
   }
@@ -46,7 +57,7 @@ class TrickComponent extends PositionComponent {
   void _syncCards() {
     removeAll(children.whereType<CardComponent>());
 
-    if (currentTrick.isEmpty) {
+    if (_currentTrick.isEmpty) {
       if (_emptyTextComp != null) {
         _emptyTextComp!.text = isMyTurn
             ? 'Your Turn to Lead'
@@ -63,11 +74,11 @@ class TrickComponent extends PositionComponent {
     final centerX = size.x / 2;
     final centerY = size.y / 2;
 
-    for (int i = 0; i < currentTrick.length; i++) {
-      final trickCard = currentTrick[i];
+    for (int i = 0; i < _currentTrick.length; i++) {
+      final trickCard = _currentTrick[i];
       final cardComp = CardComponent(card: trickCard.card);
 
-      final offset = (i - (currentTrick.length - 1) / 2) * 20;
+      final offset = (i - (_currentTrick.length - 1) / 2) * 20;
       cardComp.position = Vector2(
         centerX - cardComp.size.x / 2 + offset,
         centerY - cardComp.size.y / 2 + (offset.abs() * 0.2),
