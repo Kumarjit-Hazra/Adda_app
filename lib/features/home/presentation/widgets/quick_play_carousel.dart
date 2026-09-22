@@ -111,8 +111,9 @@ class QuickPlayCarousel extends ConsumerWidget {
       margin: const EdgeInsets.only(right: 12),
       child: SurfaceCard(
         onTap: () {
-          // TODO(Phase 10): Trigger markBrainCompleted() from GameResult/GameSession integration when implemented.
-          if (game.id == 'twenty_nine') {
+          // TODO(Phase 10+): Brain Arena Daily completion should originate from
+          // the actual Brain Arena GameResult/GameSession completion event, not here.
+          if (game.supportsSolo) {
             context.push('/play/solo/${game.id}');
           } else {
             context.push('/play');

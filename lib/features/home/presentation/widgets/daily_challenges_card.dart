@@ -76,7 +76,32 @@ class DailyChallengesCard extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => const SizedBox(),
+      error: (error, stack) => SurfaceCard(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.info_outline_rounded,
+              color: Colors.white54,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Daily challenges unavailable right now.',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+            ),
+            TextButton(
+              onPressed: () => ref.invalidate(dailyStateProvider),
+              child: const Text(
+                'Retry',
+                style: TextStyle(color: AddaColors.amber),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

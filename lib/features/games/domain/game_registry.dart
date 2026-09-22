@@ -42,6 +42,7 @@ class GameRegistry {
       engineFactory: () => TwentyNineEngine(),
       botFactory: (playerId, difficulty) =>
           TwentyNineBotPlayer(playerId: playerId, difficulty: difficulty),
+      supportsSolo: true, // Has a dedicated solo route and bot support.
     );
 
     _register(
@@ -188,6 +189,7 @@ class GameRegistry {
     required Duration estimatedDuration,
     required ActivityEngine Function() engineFactory,
     BotPlayer Function(String, BotDifficulty)? botFactory,
+    bool supportsSolo = false,
   }) {
     _definitions[id] = GameDefinition(
       id: id,
@@ -197,6 +199,7 @@ class GameRegistry {
       minPlayers: minPlayers,
       maxPlayers: maxPlayers,
       estimatedDuration: estimatedDuration,
+      supportsSolo: supportsSolo,
     );
     _engineFactories[id] = engineFactory;
     if (botFactory != null) {
@@ -266,6 +269,14 @@ class GameDefinition {
   final String? description;
   final String? iconName; // Material icon name
 
+  /// Whether this game supports a solo-play route without a RoomSession.
+  ///
+  /// When true, Quick Play will navigate to `/play/solo/<id>`.
+  /// When false, Quick Play navigates to the Play catalog (`/play`).
+  /// This is the canonical source of truth for solo-launch capability;
+  /// widgets must not hard-code game IDs to determine routing.
+  final bool supportsSolo;
+
   const GameDefinition({
     required this.id,
     required this.activityId,
@@ -277,6 +288,7 @@ class GameDefinition {
     this.badge,
     this.description,
     this.iconName,
+    this.supportsSolo = false,
   });
 
   /// Creates a copy with additional metadata.
@@ -284,6 +296,7 @@ class GameDefinition {
     String? badge,
     String? description,
     String? iconName,
+    bool? supportsSolo,
   }) {
     return GameDefinition(
       id: id,
@@ -296,6 +309,7 @@ class GameDefinition {
       badge: badge ?? this.badge,
       description: description ?? this.description,
       iconName: iconName ?? this.iconName,
+      supportsSolo: supportsSolo ?? this.supportsSolo,
     );
   }
 

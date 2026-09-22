@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:adda/features/home/presentation/screens/home_screen.dart';
-import 'package:adda/features/auth/presentation/providers/auth_provider.dart' hide storageServiceProvider;
+import 'package:adda/features/auth/presentation/providers/auth_provider.dart'
+    hide storageServiceProvider;
 import 'package:adda/features/room/presentation/providers/room_provider.dart';
 import 'package:adda/features/spaces/presentation/providers/space_provider.dart';
 import 'package:adda/features/home/application/daily_providers.dart';
 import 'package:adda/features/auth/domain/models/user_profile.dart';
 import 'package:adda/features/home/domain/models/daily_state.dart';
-import 'package:adda/features/home/data/daily_repository.dart';
 import 'package:adda/core/storage/storage_service.dart';
 import 'package:adda/features/auth/domain/repositories/auth_repository.dart';
 import 'package:adda/features/spaces/domain/repositories/space_repository.dart';
@@ -24,7 +24,9 @@ void main() {
       ProviderScope(
         overrides: [
           authProvider.overrideWith((ref) => MockAuthNotifier()),
-          roomProvider.overrideWith((ref) => MockRoomNotifier()), // No active room
+          roomProvider.overrideWith(
+            (ref) => MockRoomNotifier(),
+          ), // No active room
           spacesProvider.overrideWith((ref) => MockSpaceNotifier()),
           storageServiceProvider.overrideWithValue(MockStorage()),
           dailyStateProvider.overrideWith(
@@ -98,12 +100,15 @@ class FakeSpaceRepo implements SpaceRepository {
 
 class MockAuthNotifier extends AuthNotifier {
   MockAuthNotifier() : super(FakeAuthRepo()) {
-    state = AsyncValue.data(UserProfile(id: '1', name: 'Test User', createdAt: DateTime.now()));
+    state = AsyncValue.data(
+      UserProfile(id: '1', name: 'Test User', createdAt: DateTime.now()),
+    );
   }
 }
 
 class MockRoomNotifier extends RoomNotifier {
-  MockRoomNotifier() : super(FakeSignaling(), FakeWebRtc(), FakePermission(), FakeRef()) {
+  MockRoomNotifier()
+    : super(FakeSignaling(), FakeWebRtc(), FakePermission(), FakeRef()) {
     state = null;
   }
 }

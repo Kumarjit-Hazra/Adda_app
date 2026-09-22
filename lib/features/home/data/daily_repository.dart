@@ -96,32 +96,46 @@ class DailyStreakCalculator {
       return DailyState(dateId: currentDateId, dailyPrompt: currentPrompt);
     }
 
-    final currentDate = DateTime(
-      int.parse(currentParts[0]),
-      int.parse(currentParts[1]),
-      int.parse(currentParts[2]),
-    );
+    // Wrap date parsing in try/catch: a dateId with the right split length
+    // (e.g. 'not-a-date') still fails int.parse with a FormatException.
+    final DateTime currentDate;
+    final DateTime storedDate;
+    try {
+      currentDate = DateTime(
+        int.parse(currentParts[0]),
+        int.parse(currentParts[1]),
+        int.parse(currentParts[2]),
+      );
+      storedDate = DateTime(
+        int.parse(storedParts[0]),
+        int.parse(storedParts[1]),
+        int.parse(storedParts[2]),
+      );
+    } on FormatException {
+      // Malformed date string — reset to fresh state.
+      return DailyState(dateId: currentDateId, dailyPrompt: currentPrompt);
+    }
 
-    final storedDate = DateTime(
-      int.parse(storedParts[0]),
-      int.parse(storedParts[1]),
-      int.parse(storedParts[2]),
-    );
-
-    // Difference in whole days
+    // Difference in whole calendar days (positive = future, negative = stored date is in the future).
     final diff = currentDate.difference(storedDate).inDays;
+
+    // Guard: stored date is somehow ahead of current date (clock skew / data corruption).
+    // Treat as a reset to avoid incorrect streak carry-forward.
+    if (diff < 0) {
+      return DailyState(dateId: currentDateId, dailyPrompt: currentPrompt);
+    }
 
     int newStreak = currentState.streakCount;
 
     // If diff is 1 (yesterday) and BOTH were completed, maintain streak.
     // Otherwise, the streak is lost.
-    // The streak only INCREMENTS when both are completed today.
+    // The streak only INCREMENTS when both are completed today (in the notifier).
     if (diff == 1 &&
         currentState.isAddaAnswered &&
         currentState.isBrainCompleted) {
-      // Streak is maintained
+      // Streak is maintained — will increment when today's activities are completed.
     } else {
-      // Gap > 1 day or didn't finish both yesterday -> Reset
+      // Gap > 1 day or didn't finish both yesterday -> Reset.
       newStreak = 0;
     }
 

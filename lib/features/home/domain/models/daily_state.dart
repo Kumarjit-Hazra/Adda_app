@@ -44,12 +44,28 @@ class DailyState {
   }
 
   factory DailyState.fromJson(Map<String, dynamic> json) {
+    final rawDateId = json['dateId'];
+    final rawPrompt = json['dailyPrompt'];
+
+    // Validate required string fields explicitly so corrupt storage throws a
+    // typed FormatException, which the repository catch block can handle safely.
+    if (rawDateId is! String || rawDateId.isEmpty) {
+      throw const FormatException('DailyState: missing or invalid dateId');
+    }
+    if (rawPrompt is! String || rawPrompt.isEmpty) {
+      throw const FormatException('DailyState: missing or invalid dailyPrompt');
+    }
+
     return DailyState(
-      dateId: json['dateId'] as String,
-      dailyPrompt: json['dailyPrompt'] as String,
-      isAddaAnswered: json['isAddaAnswered'] as bool? ?? false,
-      isBrainCompleted: json['isBrainCompleted'] as bool? ?? false,
-      streakCount: json['streakCount'] as int? ?? 0,
+      dateId: rawDateId,
+      dailyPrompt: rawPrompt,
+      isAddaAnswered: json['isAddaAnswered'] is bool
+          ? json['isAddaAnswered'] as bool
+          : false,
+      isBrainCompleted: json['isBrainCompleted'] is bool
+          ? json['isBrainCompleted'] as bool
+          : false,
+      streakCount: json['streakCount'] is int ? json['streakCount'] as int : 0,
     );
   }
 }

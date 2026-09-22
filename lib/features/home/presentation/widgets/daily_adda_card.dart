@@ -170,7 +170,32 @@ class _DailyAddaCardState extends ConsumerState<DailyAddaCard> {
         padding: EdgeInsets.all(32),
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (error, stack) => const SizedBox(),
+      error: (error, stack) => SurfaceCard(
+        padding: const EdgeInsets.all(AddaSpacing.lg),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.info_outline_rounded,
+              color: Colors.white54,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Daily Adda unavailable right now.',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+            ),
+            TextButton(
+              onPressed: () => ref.invalidate(dailyStateProvider),
+              child: const Text(
+                'Retry',
+                style: TextStyle(color: AddaColors.coral),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

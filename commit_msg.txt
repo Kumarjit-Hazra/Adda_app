@@ -1,0 +1,44 @@
+chore(phase-9): hardening pass — defensive deserialization, error states, supportsSolo, test expansion
+
+## Summary
+
+### Production Code Fixes (6)
+
+1. **GameDefinition.supportsSolo** — Add canonical boolean capability to
+   GameDefinition and propagate through _register(). Documents the
+   architectural boundary: widgets must not hard-code game IDs.
+
+2. **QuickPlayCarousel routing** — Replace `game.id == 'twenty_nine'` with
+   `game.supportsSolo` check. Any future solo-capable game now routes
+   correctly without touching Home.
+
+3. **DailyState.fromJson defensive deserialization** — Replace unsafe `as
+   String` casts (throws TypeError, bypasses catch) with `is String` type
+   checks that throw typed FormatException (caught by repository).
+
+4. **DailyAddaCard error state** — Replace silent `const SizedBox()` with
+   a SurfaceCard containing the error message and a Retry button that
+   invalidates the provider.
+
+5. **DailyChallengesCard error state** — Same graceful error pattern.
+
+6. **DailyStreakCalculator hardening** — Two improvements:
+   a. Guard for diff < 0 (stored date is in the future / clock skew).
+   b. Wrap int.parse calls in try/catch(FormatException) for malformed
+      dateId strings like 'not-a-date' that pass the split-length check.
+
+### Test Expansion (5 files)
+
+- daily_repository_test.dart: 4 → 22 tests
+  (DailyStreakCalculator, DailyState.fromJson, DailyRepository)
+- daily_state_notifier_test.dart: 1 → 11 tests
+  (load, completion, streak, persistence, failure modes)
+- daily_adda_card_test.dart: 0 → 6 tests
+  (empty/filled answer, completion state, share tap, answer privacy)
+- daily_challenges_card_test.dart: [NEW] 7 tests
+  (0/1/2 done, streak badge, error state)
+- quick_play_carousel_test.dart: 2 tests updated to use supportsSolo
+
+Total: 9 → 50 tests, all passing.
+
+No Phase 10 features introduced. No architectural boundaries violated.
