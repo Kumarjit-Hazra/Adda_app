@@ -24,7 +24,11 @@ class CardComponent extends PositionComponent with TapCallbacks {
     final displayColor = color.withAlpha(alpha);
 
     final rankTextPaint = TextPaint(
-      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: displayColor),
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w900,
+        color: displayColor,
+      ),
     );
 
     final suitTextPaint = TextPaint(
@@ -69,7 +73,9 @@ class CardComponent extends PositionComponent with TapCallbacks {
     canvas.drawRRect(rrect, bgPaint);
 
     final borderPaint = Paint()
-      ..color = isMyTurn ? const Color(0xFFFF6B6B).withAlpha(alpha) : Colors.black26.withAlpha(alpha)
+      ..color = isMyTurn
+          ? const Color(0xFFFF6B6B).withAlpha(alpha)
+          : Colors.black26.withAlpha(alpha)
       ..style = PaintingStyle.stroke
       ..strokeWidth = isMyTurn ? 2 : 1;
     canvas.drawRRect(rrect, borderPaint);
@@ -78,17 +84,17 @@ class CardComponent extends PositionComponent with TapCallbacks {
   @override
   void onTapDown(TapDownEvent event) {
     if (!isMyTurn || onPlay == null) return;
-    
+
     final now = DateTime.now().millisecondsSinceEpoch;
     if (now - _lastTapTime < _debounceMs || _isTapped) {
       return; // Debounce duplicate rapid taps
     }
-    
+
     _isTapped = true;
     _lastTapTime = now;
-    
+
     onPlay!(card);
-    
+
     // We expect the state to update and rebuild/remove this component shortly,
     // but just in case, we reset the tap lock after a while.
     Future.delayed(const Duration(milliseconds: _debounceMs), () {

@@ -67,21 +67,30 @@ class InMemoryChatRepository implements ChatRepository {
     String conversationId,
     ChatMessage message,
   ) async {
+    // Optimistic update
+    final msgs = _messages[conversationId] ?? [];
+    final existingIndex = msgs.indexWhere((m) => m.id == message.id);
+    if (existingIndex >= 0) {
+      msgs[existingIndex] = message;
+    } else {
+      msgs.add(message);
+    }
+    _messages[conversationId] = msgs;
+    _emitMessages(conversationId);
+
     await Future.delayed(
       const Duration(milliseconds: 500),
     ); // simulate network delay
 
     final sentMessage = message.copyWith(status: MessageStatus.sent);
-    final msgs = _messages[conversationId] ?? [];
+    final msgsRef = _messages[conversationId] ?? [];
 
-    // Replace the optimistic "sending" message if it exists, otherwise add it
-    final index = msgs.indexWhere((m) => m.id == message.id);
+    // Replace the optimistic "sending" message
+    final index = msgsRef.indexWhere((m) => m.id == message.id);
     if (index >= 0) {
-      msgs[index] = sentMessage;
-    } else {
-      msgs.add(sentMessage);
+      msgsRef[index] = sentMessage;
     }
-    _messages[conversationId] = msgs;
+    _messages[conversationId] = msgsRef;
 
     final conv = _conversations[conversationId];
     if (conv != null) {
@@ -106,17 +115,20 @@ class InMemoryChatRepository implements ChatRepository {
   }
 
   @override
-  Stream<List<ChatConversation>> watchConversations() {
-    return _conversationsController.stream;
+  Stream<List<ChatConversation>> watchConversations() async* {
+    yield _conversations.values.toList()
+      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    yield* _conversationsController.stream;
   }
 
   @override
-  Stream<List<ChatMessage>> watchMessages(String conversationId) {
+  Stream<List<ChatMessage>> watchMessages(String conversationId) async* {
+    yield _messages[conversationId] ?? [];
     if (!_messagesControllers.containsKey(conversationId)) {
       _messagesControllers[conversationId] =
           StreamController<List<ChatMessage>>.broadcast();
     }
-    return _messagesControllers[conversationId]!.stream;
+    yield* _messagesControllers[conversationId]!.stream;
   }
 
   void dispose() {

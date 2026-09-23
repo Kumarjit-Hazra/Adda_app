@@ -113,7 +113,7 @@ class QuickPlayCarousel extends ConsumerWidget {
         onTap: () {
           // TODO(Phase 10+): Brain Arena Daily completion should originate from
           // the actual Brain Arena GameResult/GameSession completion event, not here.
-          if (game.supportsSolo) {
+          if (game.playableSolo) {
             context.push('/play/solo/${game.id}');
           } else {
             context.push('/play');

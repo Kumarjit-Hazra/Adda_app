@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../shared/design_system/widgets/app_scaffold.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/domain/models/user_profile.dart';
 import '../../domain/game_session.dart';
 import '../../domain/game_session_notifier.dart';
 import '../../domain/game_registry.dart';
@@ -21,20 +22,19 @@ class ActiveGameScreen extends ConsumerStatefulWidget {
 }
 
 class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
-  bool _initializing = true;
+  bool _initializing = false;
+  bool _initialized = false;
 
-  @override
-  void initState() {
-    super.initState();
+  void _triggerInitialization(UserProfile user) {
+    if (_initializing || _initialized) return;
+    // We cannot call setState here if we are inside build, but we can do it post-frame
+    _initializing = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeSession();
+      _initializeSession(user);
     });
   }
 
-  Future<void> _initializeSession() async {
-    final user = ref.read(authProvider).valueOrNull;
-    if (user == null) return;
-
+  Future<void> _initializeSession(UserProfile user) async {
     final definition = GameRegistry.getDefinition(widget.gameId);
     final adapter = GamePresentationRegistry.getAdapter(widget.gameId);
 
@@ -42,6 +42,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
       if (mounted) {
         setState(() {
           _initializing = false;
+          _initialized = true;
         });
       }
       return;
@@ -72,6 +73,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
     if (mounted) {
       setState(() {
         _initializing = false;
+        _initialized = true;
       });
     }
   }
@@ -131,6 +133,41 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(gameSessionProvider(widget.gameId));
+    final authState = ref.watch(authProvider);
+
+    ref.listen(authProvider, (previous, next) {
+      if (next.hasValue && next.value != null) {
+        _triggerInitialization(next.value!);
+      }
+    });
+
+    if (authState.hasValue && authState.value != null) {
+      _triggerInitialization(authState.value!);
+    }
+
+    if (authState.isLoading && !_initialized) {
+      return AppScaffold(
+        appBar: GameTopBar(
+          title: _getGameTitle(),
+          isFinished: false,
+          onRematch: _handleRematch,
+          onExit: _handleExit,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (authState.hasError) {
+      return AppScaffold(
+        appBar: GameTopBar(
+          title: _getGameTitle(),
+          isFinished: false,
+          onRematch: _handleRematch,
+          onExit: _handleExit,
+        ),
+        body: Center(child: Text('Failed to load profile: ${authState.error}')),
+      );
+    }
 
     return AppScaffold(
       appBar: GameTopBar(

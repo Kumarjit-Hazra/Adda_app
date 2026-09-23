@@ -49,11 +49,6 @@ class ChatService {
       status: MessageStatus.sending,
     );
 
-    // Optimistically add to the repo which updates the stream
-    final msgs = await repository.getMessages(conversationId);
-    msgs.add(tempMessage);
-    // Note: A true repository would have a specific method for optimistic updates,
-    // but here we just call sendMessage which will replace the optimistic one.
     try {
       await repository.sendMessage(conversationId, tempMessage);
     } catch (e) {

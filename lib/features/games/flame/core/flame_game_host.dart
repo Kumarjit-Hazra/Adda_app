@@ -37,7 +37,7 @@ class _FlameGameHostState<TState, TGame extends AddaFlameGame<TState>>
   void didUpdateWidget(FlameGameHost<TState, TGame> oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Note: We deliberately do not recreate _game on widget update.
-    // The same FlameGame instance should persist to maintain 
+    // The same FlameGame instance should persist to maintain
     // internal component state and avoid full scene rebuilds.
   }
 

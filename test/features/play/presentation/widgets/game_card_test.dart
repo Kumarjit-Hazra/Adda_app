@@ -65,7 +65,7 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('shows solo badge if game is twenty_nine', (tester) async {
+    testWidgets('shows solo badge if game is playable solo', (tester) async {
       final game = GameDefinition(
         id: 'twenty_nine',
         activityId: 'twenty_nine',
@@ -74,6 +74,7 @@ void main() {
         minPlayers: 4,
         maxPlayers: 4,
         estimatedDuration: const Duration(minutes: 15),
+        supportsSolo: true,
       );
 
       await tester.pumpWidget(
@@ -81,6 +82,25 @@ void main() {
       );
 
       expect(find.text('SOLO'), findsOneWidget);
+    });
+
+    testWidgets('shows coming soon if game is not playable solo', (tester) async {
+      final game = GameDefinition(
+        id: 'test_game',
+        activityId: 'test_game',
+        title: 'Test Game Title',
+        category: ActivityCategory.party,
+        minPlayers: 3,
+        maxPlayers: 5,
+        estimatedDuration: const Duration(minutes: 15),
+        supportsSolo: false,
+      );
+
+      await tester.pumpWidget(
+        buildTestApp(GameCard(game: game, isDark: false, onTap: () {})),
+      );
+
+      expect(find.text('COMING SOON'), findsOneWidget);
     });
   });
 }

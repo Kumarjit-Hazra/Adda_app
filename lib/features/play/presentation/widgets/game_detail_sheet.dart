@@ -26,8 +26,7 @@ class GameDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Currently only Twenty-Nine supports solo play
-    final bool soloAvailable = game.id == 'twenty_nine';
+    final bool soloAvailable = game.playableSolo;
 
     return Container(
       decoration: BoxDecoration(
@@ -161,11 +160,8 @@ class GameDetailSheet extends StatelessWidget {
               )
             else
               AppButton(
-                text: 'Play with Friends (Hangout)',
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  context.go('/hangout');
-                },
+                text: 'Coming Soon',
+                onPressed: null, // Disabled
               ),
 
             const SizedBox(height: AddaSpacing.md),
