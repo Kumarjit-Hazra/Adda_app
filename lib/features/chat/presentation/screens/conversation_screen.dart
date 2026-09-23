@@ -41,14 +41,12 @@ class ConversationScreen extends ConsumerWidget {
                 }
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  reverse:
-                      true, // Typically chats have newest at bottom, but we are appending.
-                  // If we use append, we should NOT reverse unless we reverse the data list.
-                  // For now, let's keep it simple: normal order, and jump to bottom.
+                  reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final authValue = ref.watch(authProvider).value;
-                    final message = messages[index];
+                    // Because reverse is true, we want the newest messages (end of list) at index 0.
+                    final message = messages[messages.length - 1 - index];
                     return MessageBubble(
                       message: message,
                       isMe: message.senderId == authValue?.id,

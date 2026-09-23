@@ -111,36 +111,53 @@ class TwentyNineFlameGame extends AddaFlameGame<TwentyNineState>
 
   void _updateComponents(TwentyNinePresentationSnapshot snapshot) {
     _trickComponent?.updateTrick(
-      snapshot.currentTrick.toList(), 
-      snapshot.myData.isTurn && snapshot.phase == TwentyNinePhase.playing
+      snapshot.currentTrick.toList(),
+      snapshot.myData.isTurn && snapshot.phase == TwentyNinePhase.playing,
     );
 
-    _topSeat?.updatePlayer(snapshot.topData.id, snapshot.topData.name, snapshot.topData.isTurn);
-    _leftSeat?.updatePlayer(snapshot.leftData.id, snapshot.leftData.name, snapshot.leftData.isTurn);
-    _rightSeat?.updatePlayer(snapshot.rightData.id, snapshot.rightData.name, snapshot.rightData.isTurn);
+    _topSeat?.updatePlayer(
+      snapshot.topData.id,
+      snapshot.topData.name,
+      snapshot.topData.isTurn,
+    );
+    _leftSeat?.updatePlayer(
+      snapshot.leftData.id,
+      snapshot.leftData.name,
+      snapshot.leftData.isTurn,
+    );
+    _rightSeat?.updatePlayer(
+      snapshot.rightData.id,
+      snapshot.rightData.name,
+      snapshot.rightData.isTurn,
+    );
 
     // Diff hand cards
-    if (_snapshot == null || 
-        !_listEquals(_snapshot!.myHand, snapshot.myHand) || 
-        _snapshot!.phase != snapshot.phase || 
+    if (_snapshot == null ||
+        !_listEquals(_snapshot!.myHand, snapshot.myHand) ||
+        _snapshot!.phase != snapshot.phase ||
         _snapshot!.myData.isTurn != snapshot.myData.isTurn) {
-          
-       removeAll(_handCards);
-       _handCards.clear();
-       
-       for (int i = 0; i < snapshot.myHand.length; i++) {
-         final card = snapshot.myHand[i];
-         final cardComp = CardComponent(
-           card: card,
-           isMyTurn: snapshot.myData.isTurn && snapshot.phase == TwentyNinePhase.playing,
-           onPlay: (PlayingCard playedCard) {
-             controller.playCard(playedCard.toMap(), localUserId, snapshot.version);
-           },
-         );
-         _handCards.add(cardComp);
-         add(cardComp);
-       }
-       _layoutHand();
+      removeAll(_handCards);
+      _handCards.clear();
+
+      for (int i = 0; i < snapshot.myHand.length; i++) {
+        final card = snapshot.myHand[i];
+        final cardComp = CardComponent(
+          card: card,
+          isMyTurn:
+              snapshot.myData.isTurn &&
+              snapshot.phase == TwentyNinePhase.playing,
+          onPlay: (PlayingCard playedCard) {
+            controller.playCard(
+              playedCard.toMap(),
+              localUserId,
+              snapshot.version,
+            );
+          },
+        );
+        _handCards.add(cardComp);
+        add(cardComp);
+      }
+      _layoutHand();
     }
   }
 
@@ -167,7 +184,7 @@ class TwentyNineFlameGame extends AddaFlameGame<TwentyNineState>
   }
 
   void _layoutHand() {
-    final handWidth = _handCards.length * 62.0; 
+    final handWidth = _handCards.length * 62.0;
     final startX = (size.x - handWidth) / 2;
     for (int i = 0; i < _handCards.length; i++) {
       _handCards[i].position = Vector2(startX + (i * 62), size.y - 100);

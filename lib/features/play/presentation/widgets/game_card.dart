@@ -71,7 +71,7 @@ class GameCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _getColorForCategory(game.category);
     // Determine if we should show a solo badge
-    final bool soloAvailable = game.id == 'twenty_nine';
+    final bool soloAvailable = game.playableSolo;
 
     return GestureDetector(
       onTap: onTap,
@@ -116,7 +116,35 @@ class GameCard extends StatelessWidget {
                         color: color.withAlpha(200),
                       ),
                     ),
-                    if (game.badge != null)
+                    if (!soloAvailable)
+                      Positioned.fill(
+                        child: Container(
+                          color: isDark ? Colors.black54 : Colors.white60,
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isDark ? Colors.black87 : Colors.white,
+                                borderRadius: AddaRadius.radiusSm,
+                                border: Border.all(color: color),
+                              ),
+                              child: Text(
+                                'COMING SOON',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  color: color,
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    else if (game.badge != null)
                       Positioned(
                         top: 12,
                         right: 12,

@@ -6,7 +6,7 @@ import '../../domain/game_session.dart';
 abstract class AddaFlameGame<T> extends FlameGame {
   T? _state;
   T? get gameState => _state;
-  
+
   GameSession? _session;
   GameSession? get gameSession => _session;
 

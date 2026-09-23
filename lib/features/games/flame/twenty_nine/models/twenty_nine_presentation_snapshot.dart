@@ -43,8 +43,8 @@ class TwentyNinePresentationSnapshot {
     required this.topData,
     required this.rightData,
     required this.version,
-  })  : myHand = UnmodifiableListView(myHand),
-        currentTrick = UnmodifiableListView(currentTrick);
+  }) : myHand = UnmodifiableListView(myHand),
+       currentTrick = UnmodifiableListView(currentTrick);
 
   @override
   bool operator ==(Object other) =>
@@ -62,7 +62,10 @@ class TwentyNinePresentationSnapshot {
   @override
   int get hashCode => version.hashCode;
 
-  static bool _listEquals<T>(UnmodifiableListView<T> a, UnmodifiableListView<T> b) {
+  static bool _listEquals<T>(
+    UnmodifiableListView<T> a,
+    UnmodifiableListView<T> b,
+  ) {
     if (identical(a, b)) return true;
     if (a.length != b.length) return false;
     for (int i = 0; i < a.length; i++) {

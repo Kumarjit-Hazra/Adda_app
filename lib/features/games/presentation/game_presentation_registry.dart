@@ -41,4 +41,10 @@ class GamePresentationRegistry {
     final factory = _adapters[gameId];
     return factory?.call();
   }
+
+  /// Checks if a presentation adapter exists for a game.
+  static bool hasAdapter(String gameId) {
+    initialize();
+    return _adapters.containsKey(gameId);
+  }
 }

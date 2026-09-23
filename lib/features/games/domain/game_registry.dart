@@ -1,4 +1,5 @@
 import '../../auth/domain/models/user_profile.dart';
+import '../presentation/game_presentation_registry.dart';
 import 'game_session.dart';
 import '../../activities/engine/bot_player.dart';
 import '../../activities/engine/activity_engine.dart';
@@ -303,6 +304,11 @@ class GameDefinition {
   /// This is the canonical source of truth for solo-launch capability;
   /// widgets must not hard-code game IDs to determine routing.
   final bool supportsSolo;
+
+  /// Whether this game can actually be played solo right now (has presentation).
+  bool get playableSolo {
+    return supportsSolo && GamePresentationRegistry.hasAdapter(id);
+  }
 
   /// Factory method to create the initial players for a solo game.
   final List<GamePlayer> Function(UserProfile user)? soloPlayerFactory;

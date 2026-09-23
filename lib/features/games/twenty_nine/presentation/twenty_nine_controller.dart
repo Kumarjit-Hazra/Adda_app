@@ -25,7 +25,7 @@ class TwentyNineController {
     required int currentVersion,
   }) {
     if (_isDisposed) return;
-    
+
     // Safety check to ensure provider still exists before dispatching
     if (!ref.exists(gameSessionNotifierProvider(gameId))) return;
 

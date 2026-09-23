@@ -5,9 +5,21 @@ import 'package:adda/features/games/twenty_nine/twenty_nine_models.dart';
 void main() {
   group('TwentyNinePresentationSnapshot', () {
     final p1 = PlayerPresentationData(id: 'p1', name: 'Player 1', isTurn: true);
-    final p2 = PlayerPresentationData(id: 'p2', name: 'Player 2', isTurn: false);
-    final p3 = PlayerPresentationData(id: 'p3', name: 'Player 3', isTurn: false);
-    final p4 = PlayerPresentationData(id: 'p4', name: 'Player 4', isTurn: false);
+    final p2 = PlayerPresentationData(
+      id: 'p2',
+      name: 'Player 2',
+      isTurn: false,
+    );
+    final p3 = PlayerPresentationData(
+      id: 'p3',
+      name: 'Player 3',
+      isTurn: false,
+    );
+    final p4 = PlayerPresentationData(
+      id: 'p4',
+      name: 'Player 4',
+      isTurn: false,
+    );
 
     test('equality checks work correctly', () {
       final snapshotA = TwentyNinePresentationSnapshot(
@@ -61,7 +73,7 @@ void main() {
 
       expect(snapshotA, isNot(equals(snapshotB)));
     });
-    
+
     test('inequality when hand changes (different identity)', () {
       final snapshotA = TwentyNinePresentationSnapshot(
         phase: TwentyNinePhase.playing,

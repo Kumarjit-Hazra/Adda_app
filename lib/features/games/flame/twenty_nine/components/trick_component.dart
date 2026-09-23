@@ -19,16 +19,10 @@ class TrickComponent extends PositionComponent {
   @override
   Future<void> onLoad() async {
     final textPaint = TextPaint(
-      style: const TextStyle(
-        color: Colors.white38,
-        fontSize: 12,
-      ),
+      style: const TextStyle(color: Colors.white38, fontSize: 12),
     );
 
-    _emptyTextComp = TextComponent(
-      text: '',
-      textRenderer: textPaint,
-    );
+    _emptyTextComp = TextComponent(text: '', textRenderer: textPaint);
     add(_emptyTextComp!);
 
     _syncCards();
@@ -36,14 +30,16 @@ class TrickComponent extends PositionComponent {
 
   void updateTrick(List<PlayedTrickCard> newTrick, bool newIsMyTurn) {
     bool shouldSync = false;
-    
-    if (_currentTrick.length != newTrick.length || 
-        (_currentTrick.isNotEmpty && newTrick.isNotEmpty && _currentTrick.last.card.id != newTrick.last.card.id)) {
+
+    if (_currentTrick.length != newTrick.length ||
+        (_currentTrick.isNotEmpty &&
+            newTrick.isNotEmpty &&
+            _currentTrick.last.card.id != newTrick.last.card.id)) {
       _currentTrick.clear();
       _currentTrick.addAll(newTrick);
       shouldSync = true;
     }
-    
+
     if (isMyTurn != newIsMyTurn) {
       isMyTurn = newIsMyTurn;
       shouldSync = true;
